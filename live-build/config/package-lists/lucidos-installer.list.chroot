@@ -1,0 +1,74 @@
+# =============================================================================
+# LucidOS Installer Package List
+# =============================================================================
+# File: config/package-lists/lucidos-installer.list.chroot
+#
+# Packages needed to install LucidOS to a hard drive.
+# Calamares is the graphical installer used by LucidOS.
+#
+# Notes:
+# - calamares: The main installer
+# - calamares-settings-debian: Debian-specific settings for Calamares
+#   (may not be available in all Debian releases — check with 'apt-cache show')
+# - partitionmanager / kpmcore: KDE partition management tools
+#   (used by Calamares for disk partitioning)
+#
+# If calamares-settings-debian is not available in Debian bookworm,
+# see BUILDING.md for manual configuration instructions.
+# =============================================================================
+
+# --- Calamares installer ---
+# The main graphical installer application.
+# Verified in Debian Bookworm. Debian 13/Trixie also has Calamares, but the
+# wider LucidOS package set is not Trixie-ready yet.
+calamares
+
+# --- Debian-specific Calamares configuration ---
+# This package provides Debian-specific modules and settings for Calamares.
+# Verified in Debian Bookworm. Re-check if changing the distribution:
+#   apt-cache show calamares-settings-debian
+# If unavailable, comment this line and hide/remove the installer launcher.
+# See BUILDING.md for Calamares configuration notes.
+calamares-settings-debian
+
+# --- KDE Partition Manager ---
+# Used by Calamares for disk partitioning.
+# partitionmanager: The GUI application
+# kpmcore: The underlying partition management library
+partitionmanager
+kpmcore
+
+# --- Additional partitioning tools ---
+# These are used internally by the partitioning system.
+parted
+gdisk
+dosfstools
+e2fsprogs
+btrfs-progs
+ntfs-3g
+exfatprogs
+
+# --- GRUB bootloader ---
+# Calamares installs GRUB during the installation process.
+#
+# IMPORTANT: Do NOT include grub-pc and grub-efi-amd64 meta-packages together.
+# They conflict and will cause apt to abort the chroot build with:
+#   "grub-pc and grub-efi-amd64 cannot both be installed"
+#
+# Instead, use the -bin packages which can coexist safely.
+# The installer (Calamares) handles selecting the right GRUB variant
+# for the target machine (BIOS or UEFI) at install time.
+grub-pc-bin
+grub-efi-amd64-bin
+grub2-common
+grub-common
+os-prober
+
+# --- Installation support utilities ---
+# Used during the installation process.
+squashfs-tools
+rsync
+
+# --- Network installer support ---
+# Useful for offline/online installation scenarios.
+# debootstrap  # Only needed if doing network install, commented out for now

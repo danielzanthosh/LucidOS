@@ -1,5 +1,4 @@
 name: Build LucidOS ISO
-# LucidOS Alpha 0.1 ISO build workflow
 
 on:
   workflow_dispatch:
@@ -55,8 +54,7 @@ jobs:
           sudo rm -rf /opt/hostedtoolcache/CodeQL
 
           docker system prune -af || true
-          sudo rm -rf /var/lib/docker || true
-          sudo rm -rf /var/lib/containerd || true
+          docker builder prune -af || true
 
           sudo apt-get clean
           sudo rm -rf /var/lib/apt/lists/*
@@ -64,39 +62,58 @@ jobs:
           echo "== Disk after cleanup =="
           df -h
 
-      - name: Install build tools
+      - name: Prepare build workspace
         run: |
           set -euxo pipefail
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            live-build \
-            debootstrap \
-            squashfs-tools \
-            xorriso \
-            isolinux \
-            syslinux-common \
-            qemu-system-x86 \
-            ovmf
+          rm -rf live-build/chroot live-build/binary live-build/build live-build/cache
+          rm -f live-build/*.iso live-build/build.log dist/*.iso || true
+          mkdir -p dist
 
       - name: Normalize executable permissions
         run: |
           set -euxo pipefail
           chmod 755 scripts/*.sh
           chmod 755 live-build/auto/config live-build/auto/build live-build/auto/clean
-          find live-build/config/hooks -type f -name "*.hook.*" -exec chmod 755 {} \;
-          find live-build/config/includes.chroot/usr/local/bin -type f -exec chmod 755 {} \;
-          find live-build/config/includes.chroot/opt/lucidos-agent/scripts -type f -name "*.sh" -exec chmod 755 {} \;
+          if [[ -d live-build/config/hooks ]]; then
+            find live-build/config/hooks -type f -name "*.hook.*" -exec chmod 755 {} \;
+          fi
+          if [[ -d live-build/config/includes.chroot/usr/local/bin ]]; then
+            find live-build/config/includes.chroot/usr/local/bin -type f -exec chmod 755 {} \;
+          fi
+          if [[ -d live-build/config/includes.chroot/opt/lucidos-agent/scripts ]]; then
+            find live-build/config/includes.chroot/opt/lucidos-agent/scripts -type f -name "*.sh" -exec chmod 755 {} \;
+          fi
           if [[ -f live-build/config/includes.chroot/etc/sudoers.d/lucidos-live ]]; then
             chmod 440 live-build/config/includes.chroot/etc/sudoers.d/lucidos-live
           else
             echo "WARNING: sudoers file not found in checkout; continuing without chmod."
           fi
 
-      - name: Verify build host
-        run: bash scripts/verify-host.sh
-
-      - name: Build ISO
-        run: bash scripts/build.sh
+      - name: Build ISO in Debian Bookworm container
+        run: |
+          set -euxo pipefail
+          docker run --rm --privileged \
+            -e DEBIAN_FRONTEND=noninteractive \
+            -v "${GITHUB_WORKSPACE}:/workspace" \
+            -w /workspace \
+            debian:bookworm bash -lc '
+              set -euxo pipefail
+              apt-get update
+              apt-get install -y --no-install-recommends \
+                ca-certificates \
+                curl \
+                git \
+                live-build \
+                debootstrap \
+                squashfs-tools \
+                xorriso \
+                isolinux \
+                syslinux-common \
+                qemu-system-x86 \
+                ovmf
+              bash scripts/verify-host.sh
+              bash scripts/build.sh
+            '
 
       - name: Debug build failure
         if: failure()
@@ -126,6 +143,15 @@ jobs:
           echo
           echo "== live-build/build.log tail =="
           tail -200 live-build/build.log || true
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lucidos-build-log
+          path: live-build/build.log
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4

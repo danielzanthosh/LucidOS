@@ -17,8 +17,11 @@ lb config noauto \
     --mirror-binary "http://deb.debian.org/debian/" \
     --keyring-packages "debian-archive-keyring" \
     --archive-areas "main contrib non-free-firmware" \
-    --mirror-binary-security "http://security.debian.org/debian-security/" \
-    --mirror-chroot-security "http://security.debian.org/debian-security/" \
+    # Security repositories are disabled for now because the live-build
+    # defaults on Ubuntu 22.04 generate an invalid bookworm/updates entry.
+    # Re-enable them after we verify the exact Debian security suite mapping
+    # for this live-build version.
+    --security "false" \
     --binary-images "iso-hybrid" \
     --bootappend-live "boot=live components quiet splash hostname=lucidos username=lucid locales=en_US.UTF-8 keyboard-layouts=us" \
     --bootappend-install "quiet" \

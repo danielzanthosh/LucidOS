@@ -1,0 +1,405 @@
+#!/bin/bash
+# =============================================================================
+# LucidOS Live Hook: Live User Setup
+# =============================================================================
+# File: config/hooks/live/0100-lucidos-live-user.hook.chroot
+#
+# This hook is executed by live-build during the chroot stage. The "live"
+# hook directory is still a build-time chroot hook location; it is not run
+# during every live boot.
+#
+# Files created in /etc/skel here are copied into the live user's home by
+# live-config when the live user is created at boot.
+#
+# IMPORTANT:
+#   - This is still run during build, inside the chroot
+#   - But it's specifically for preparing the live environment
+#   - The live user ('lucid') is created by live-config at boot time
+#     so we can only create templates here (like /etc/skel setup)
+# =============================================================================
+
+set -euo pipefail
+
+log() {
+    echo "[LucidOS LiveHook] $(date '+%H:%M:%S') $*"
+}
+
+log "Setting up LucidOS live user environment..."
+
+# --------------------------------------------------------------------------
+# 1. Prepare /etc/skel for the live user
+# --------------------------------------------------------------------------
+# Files placed in /etc/skel/ are automatically copied to new user home dirs.
+# The live user ('lucid') will have these files in their home directory.
+log "Configuring /etc/skel for live user..."
+
+# Create .config directory structure
+mkdir -p /etc/skel/.config
+mkdir -p /etc/skel/.config/gtk-3.0
+mkdir -p /etc/skel/.config/gtk-4.0
+mkdir -p /etc/skel/.local
+mkdir -p /etc/skel/.local/share
+mkdir -p /etc/skel/.local/bin
+
+# Create Desktop directory for live user
+mkdir -p /etc/skel/Desktop
+
+# --------------------------------------------------------------------------
+# 2. KDE Plasma configuration skeleton
+# --------------------------------------------------------------------------
+log "Setting up KDE Plasma skel configuration..."
+
+# KDE configuration directory
+mkdir -p /etc/skel/.config
+
+# Plasma configuration
+# kdeglobals: Global KDE/Qt settings (color scheme, fonts, etc.)
+cat > /etc/skel/.config/kdeglobals << 'EOF'
+# LucidOS KDE Global Settings
+# This file sets default KDE/Qt appearance for all new users.
+# =============================================================================
+# LUCID GLASS THEME — Alpha 0.1 defaults
+# Uses Breeze Dark as the base theme with transparency hints
+# TODO (Alpha 0.2): Replace with a proper Lucid Glass Plasma theme package
+# =============================================================================
+
+[General]
+ColorScheme=BreezeDark
+Name=Lucid Glass (Breeze Dark base)
+shadeSortColumn=true
+
+[Icons]
+# Breeze is guaranteed by the KDE package set. Papirus-Dark is installed when
+# papirus-icon-theme is available, but keeping Breeze here avoids a fragile
+# first-login dependency on an optional theme package.
+Theme=breeze-dark
+
+[KDE]
+LookAndFeelPackage=org.kde.breezedark.desktop
+SingleClick=false
+AnimationDurationFactor=0.5
+widgetStyle=Breeze
+
+[WM]
+activeBackground=21,21,36
+activeBlend=21,21,36
+activeForeground=230,230,255
+activeFrame=21,21,36
+inactiveBackground=18,18,28
+inactiveBlend=18,18,28
+inactiveForeground=120,120,170
+inactiveFrame=18,18,28
+EOF
+
+# KWin configuration (window manager / compositor)
+cat > /etc/skel/.config/kwinrc << 'EOF'
+# LucidOS KWin Configuration
+# Controls window management, effects, and compositor settings
+# =============================================================================
+
+[Compositing]
+# Enable the compositor for transparency and blur effects
+Enabled=true
+# OpenGL backend (OpenGL 2.0 is widely compatible)
+Backend=OpenGL
+# Enable vertical sync to prevent screen tearing
+GLPreferBufferSwap=a
+# Latency mode: prefer smoother animation (0=extreme, 5=conservative)
+LatencyPolicy=Medium
+
+[Effect-Blur]
+# Enable the blur effect for glass-like windows and panels
+# This is what gives the "Lucid Glass" effect
+# Blur radius: 15 is a good balance between performance and look
+BlurStrength=15
+NoiseStrength=1
+
+[Effect-Overview]
+# Task switcher style
+BorderActivate=9
+
+[ElectricBorders]
+# Disable electric border actions (corners and edges)
+# Users can configure these in System Settings
+Bottom=None
+BottomLeft=None
+BottomRight=None
+Left=None
+Right=None
+Top=None
+TopLeft=None
+TopRight=None
+
+[Windows]
+# Show window thumbnails in the taskbar
+ActiveMouseScreen=false
+# Default window placement
+Placement=Smart
+
+[Plugins]
+# Enable blur effect for glass look
+blurEnabled=true
+# Enable background contrast for better readability with blur
+contrastEnabled=true
+# Enable slide-in animations
+slideEnabled=true
+# Enable window open/close animations
+kwin4_effect_fadingpopupsEnabled=true
+EOF
+
+# Plasma shell configuration
+cat > /etc/skel/.config/plasmashellrc << 'EOF'
+# LucidOS Plasma Shell Configuration
+# Controls the overall Plasma shell behavior
+# =============================================================================
+
+[PlasmaViews][Panel 0][Defaults]
+thickness=48
+
+[PlasmaViews][Panel 1][Defaults]
+thickness=48
+EOF
+
+# --------------------------------------------------------------------------
+# 3. KDE Plasma Look and Feel (default panel layout)
+# --------------------------------------------------------------------------
+# The panel layout is controlled by the Look And Feel package.
+# For Alpha 0.1, we use the default Breeze Dark look.
+# TODO (Alpha 0.2): Create a proper Lucid Glass Look and Feel package
+
+# --------------------------------------------------------------------------
+# 4. GTK theme configuration (for GTK apps)
+# --------------------------------------------------------------------------
+log "Setting up GTK theme configuration..."
+
+cat > /etc/skel/.config/gtk-3.0/settings.ini << 'EOF'
+[Settings]
+gtk-application-prefer-dark-theme=1
+gtk-theme-name=Breeze-Dark
+gtk-icon-theme-name=Papirus-Dark
+gtk-font-name=Noto Sans 10
+gtk-cursor-theme-name=breeze_cursors
+gtk-cursor-theme-size=24
+gtk-toolbar-style=GTK_TOOLBAR_BOTH_HORIZ
+gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+gtk-button-images=0
+gtk-menu-images=0
+gtk-enable-event-sounds=1
+gtk-enable-input-feedback-sounds=0
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintfull
+gtk-xft-rgba=rgb
+EOF
+
+cat > /etc/skel/.config/gtk-4.0/settings.ini << 'EOF'
+[Settings]
+gtk-application-prefer-dark-theme=1
+gtk-theme-name=Breeze-Dark
+gtk-icon-theme-name=Papirus-Dark
+gtk-font-name=Noto Sans 10
+gtk-cursor-theme-name=breeze_cursors
+gtk-cursor-theme-size=24
+EOF
+
+# --------------------------------------------------------------------------
+# 5. Konsole (terminal) configuration
+# --------------------------------------------------------------------------
+log "Setting up Konsole terminal profile..."
+mkdir -p /etc/skel/.local/share/konsole
+
+# Konsole profile — Lucid Glass terminal look
+cat > /etc/skel/.local/share/konsole/LucidGlass.profile << 'EOF'
+[Appearance]
+ColorScheme=Breeze
+Font=Hack,11,-1,5,50,0,0,0,0,0
+
+[General]
+Command=/bin/bash
+Name=Lucid Glass
+Parent=FALLBACK/
+TerminalColumns=100
+TerminalRows=28
+
+[Scrolling]
+HistoryMode=2
+HistorySize=5000
+
+[Terminal Features]
+BlinkingCursorEnabled=true
+EOF
+
+# Set this as the default Konsole profile
+mkdir -p /etc/skel/.config
+cat > /etc/skel/.config/konsolerc << 'EOF'
+[Desktop Entry]
+DefaultProfile=LucidGlass.profile
+
+[MainWindow]
+menuBarVisible=false
+
+[TabBar]
+NewTabBehavior=PutNewTabAtEnd
+EOF
+
+# --------------------------------------------------------------------------
+# 6. Dolphin (file manager) configuration
+# --------------------------------------------------------------------------
+log "Setting up Dolphin file manager defaults..."
+mkdir -p /etc/skel/.config
+
+cat > /etc/skel/.config/dolphinrc << 'EOF'
+[General]
+EditableUrl=false
+HomeUrl=file:///home/lucid
+ShowFullPath=false
+ShowStatusBar=true
+ShowZoomSlider=true
+ShowToolbar=true
+SortingChoice=SortByName
+ViewMode=Icons
+VersionControl=
+
+[IconsMode]
+# Icon size in pixels: 32, 48, 64, 128
+IconSize=48
+PreviewSize=64
+
+[DetailsMode]
+# Show these columns by default
+VisibleRoles=text,size,modificationtime
+EOF
+
+# --------------------------------------------------------------------------
+# 7. Bash configuration for the live user
+# --------------------------------------------------------------------------
+log "Setting up bash configuration..."
+
+cat > /etc/skel/.bashrc << 'EOF'
+# LucidOS Default .bashrc
+# ============================================================================
+# This file is sourced for interactive bash sessions.
+# Customize this file to suit your preferences.
+# ============================================================================
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# --- History settings ---
+HISTCONTROL=ignoreboth
+HISTSIZE=1000
+HISTFILESIZE=2000
+shopt -s histappend
+
+# --- Window size check after each command ---
+shopt -s checkwinsize
+
+# --- Color prompt ---
+if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+    # Lucid Glass prompt: username@host:path$
+    PS1='\[\033[38;5;105m\]\u\[\033[38;5;69m\]@\[\033[38;5;141m\]\h\[\033[0m\]:\[\033[38;5;75m\]\w\[\033[0m\]\$ '
+else
+    PS1='\u@\h:\w\$ '
+fi
+
+# --- Aliases ---
+alias ls='ls --color=auto'
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias grep='grep --color=auto'
+alias diff='diff --color=auto'
+alias ip='ip --color=auto'
+
+# --- LucidOS specific aliases ---
+alias lucid-agent='lucidos-agent'
+alias agent='lucidos-agent'
+
+# --- Enable bash completion ---
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+# --- LucidOS welcome message on first login ---
+# Shows a brief welcome if this is an interactive shell
+# (Disabled for non-interactive or piped sessions)
+if [[ $- == *i* ]] && [[ -z "${LUCIDOS_WELCOME_SHOWN}" ]]; then
+    export LUCIDOS_WELCOME_SHOWN=1
+    echo ""
+    echo "  🌟 Welcome to LucidOS Alpha 0.1"
+    echo "  Type 'lucidos-agent' to launch the Lucid Agent."
+    echo "  Type 'lucidos-welcome' to see the welcome message."
+    echo ""
+fi
+EOF
+
+cat > /etc/skel/.bash_profile << 'EOF'
+# LucidOS .bash_profile
+# Sourced for login shells. Sources .bashrc for interactive use.
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+
+# User-specific bin directory
+if [ -d "$HOME/.local/bin" ]; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+EOF
+
+# --------------------------------------------------------------------------
+# 8. Set up Desktop shortcuts for live user
+# --------------------------------------------------------------------------
+log "Setting up Desktop shortcuts..."
+
+# The Desktop shortcuts are placed in /etc/skel/Desktop/
+# They will be automatically copied to /home/lucid/Desktop when the live user is created
+
+# Install LucidOS launcher
+cat > /etc/skel/Desktop/install-lucidos.desktop << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Install LucidOS
+GenericName=Install to disk
+Comment=Install LucidOS to your hard drive using the Calamares installer
+Exec=sudo -n /usr/bin/calamares
+Icon=calamares
+Terminal=false
+Categories=System;
+Keywords=install;installer;calamares;
+X-Desktop-File-Install-Version=0.22
+EOF
+
+# Lucid Agent launcher
+cat > /etc/skel/Desktop/lucid-agent.desktop << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Lucid Agent
+GenericName=AI Assistant
+Comment=Safe local agentic assistant shell for LucidOS
+Exec=konsole -e lucidos-agent
+Icon=utilities-terminal
+Terminal=false
+Categories=System;Utility;
+Keywords=agent;ai;assistant;lucid;
+X-Desktop-File-Install-Version=0.22
+EOF
+
+# Make desktop files executable
+chmod +x /etc/skel/Desktop/install-lucidos.desktop
+chmod +x /etc/skel/Desktop/lucid-agent.desktop
+
+log "Desktop shortcuts created"
+
+# --------------------------------------------------------------------------
+# Done
+# --------------------------------------------------------------------------
+log "Live user environment setup completed."

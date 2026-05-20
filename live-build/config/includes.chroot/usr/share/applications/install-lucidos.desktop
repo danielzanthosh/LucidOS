@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Install LucidOS
+GenericName=System Installer
+Comment=Install LucidOS to your hard drive using the Calamares graphical installer
+Exec=sudo -n /usr/bin/calamares
+Icon=calamares
+Terminal=false
+Categories=System;
+Keywords=install;installer;calamares;setup;
+StartupNotify=true
+X-KDE-SubstituteUID=false

@@ -1,0 +1,13 @@
+#!/bin/sh
+# =============================================================================
+# LucidOS live-build auto/build
+# =============================================================================
+# Called by 'lb build'. Runs the actual build process.
+# You do not normally need to modify this file.
+#
+# This file is kept minimal â€” all configuration is in auto/config.
+# =============================================================================
+
+set -e
+
+lb build noauto "${@}"

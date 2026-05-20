@@ -1,0 +1,284 @@
+#!/bin/bash
+# =============================================================================
+# LucidOS Chroot Hook: System Defaults
+# =============================================================================
+# File: config/hooks/normal/0100-lucidos-defaults.hook.chroot
+#
+# This hook runs INSIDE the chroot during the build process.
+# It sets up system-wide defaults for LucidOS.
+#
+# Hooks in config/hooks/normal/ run after package installation.
+# They can be used to:
+#   - Configure packages
+#   - Set system defaults
+#   - Create or modify files
+#   - Enable/disable services
+#
+# IMPORTANT:
+#   - This runs as root inside the chroot
+#   - The chroot is a minimal Debian system — not the live session
+#   - Changes here affect the final installed system
+#   - Do not use 'sudo' here — you're already root
+# =============================================================================
+
+set -euo pipefail
+
+# Log output with timestamps
+log() {
+    echo "[LucidOS Hook] $(date '+%H:%M:%S') $*"
+}
+
+log "Starting LucidOS system defaults hook..."
+
+# --------------------------------------------------------------------------
+# 1. Set system hostname
+# --------------------------------------------------------------------------
+log "Setting hostname to: lucidos"
+echo "lucidos" > /etc/hostname
+
+# Update /etc/hosts so the hostname resolves locally
+cat > /etc/hosts << 'EOF'
+127.0.0.1   localhost
+127.0.1.1   lucidos
+::1         localhost ip6-localhost ip6-loopback
+ff02::1     ip6-allnodes
+ff02::2     ip6-allrouters
+EOF
+
+# --------------------------------------------------------------------------
+# 2. Set default locale
+# --------------------------------------------------------------------------
+log "Configuring locale: en_US.UTF-8"
+if command -v locale-gen &>/dev/null; then
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+    locale-gen
+    update-locale LANG=en_US.UTF-8
+fi
+
+# --------------------------------------------------------------------------
+# 3. Configure SDDM safely
+# --------------------------------------------------------------------------
+log "Configuring SDDM display manager..."
+
+# Create the SDDM configuration directory
+mkdir -p /etc/sddm.conf.d
+
+# Keep the known-good Breeze theme active. The LucidOS SDDM theme is installed
+# for manual testing, but it is not enabled by default in Alpha 0.1.
+
+SDDM_THEME="breeze"
+if [[ -f /usr/share/sddm/themes/lucidos/Main.qml ]]; then
+    log "LucidOS SDDM theme installed but not activated by default"
+else
+    log "LucidOS SDDM theme not found; Breeze remains active"
+fi
+
+cat > /etc/sddm.conf.d/lucidos.conf << EOF
+# LucidOS SDDM Configuration
+# =============================================================================
+# This configures SDDM (the display manager / login screen) for LucidOS.
+# The 'lucidos' theme is a minimal starter theme included with LucidOS.
+#
+# To change the theme after installation:
+#   sudo nano /etc/sddm.conf.d/lucidos.conf
+#   (change the Current= line)
+# Or use System Settings → Startup and Shutdown → Login Screen (SDDM)
+
+[Theme]
+# Alpha 0.1 keeps Breeze active so login remains recoverable. The LucidOS theme
+# is installed under /usr/share/sddm/themes/lucidos for manual testing.
+Current=${SDDM_THEME}
+
+[General]
+# Numlock state at login: on, off, none
+Numlock=on
+
+[Users]
+# Minimum and maximum UID to display in the user list
+MinimumUid=1000
+MaximumUid=60000
+EOF
+
+log "SDDM configured with theme: ${SDDM_THEME}"
+
+# --------------------------------------------------------------------------
+# 4. Enable required systemd services
+# --------------------------------------------------------------------------
+log "Enabling system services..."
+
+# Enable NetworkManager for network management
+if systemctl list-unit-files | grep -q "NetworkManager.service"; then
+    systemctl enable NetworkManager.service
+    log "NetworkManager enabled"
+fi
+
+# Enable SDDM display manager
+if systemctl list-unit-files | grep -q "sddm.service"; then
+    systemctl enable sddm.service
+    log "SDDM enabled"
+fi
+
+# Enable Bluetooth (if installed)
+if systemctl list-unit-files | grep -q "bluetooth.service"; then
+    systemctl enable bluetooth.service
+    log "Bluetooth enabled"
+fi
+
+# Enable PipeWire audio (user service — enabled per-user, not system-wide)
+# This is handled by live-config and user session, not here.
+
+# --------------------------------------------------------------------------
+# 5. Configure sudo for the live user
+# --------------------------------------------------------------------------
+# Note: The live user is created by live-config, not this hook.
+# The sudoers.d file is copied from includes.chroot/etc/sudoers.d/
+# so it will already be in place. This hook just verifies the permissions.
+log "Checking sudoers.d permissions..."
+if [[ -f /etc/sudoers.d/lucidos-live ]]; then
+    chmod 440 /etc/sudoers.d/lucidos-live
+    log "sudoers.d/lucidos-live permissions set correctly"
+fi
+
+# --------------------------------------------------------------------------
+# 6. Set correct permissions on agent directory
+# --------------------------------------------------------------------------
+log "Setting permissions on /opt/lucidos-agent..."
+if [[ -d /opt/lucidos-agent ]]; then
+    # The agent directory should be readable by all users
+    chmod 755 /opt/lucidos-agent
+    # Scripts should be executable
+    if [[ -d /opt/lucidos-agent/scripts ]]; then
+        chmod 755 /opt/lucidos-agent/scripts
+        find /opt/lucidos-agent/scripts -name "*.sh" -exec chmod 755 {} \;
+        # Explicitly chmod the two known agent scripts.
+        # Windows filesystems do NOT preserve Unix execute permissions,
+        # so these files arrive without the executable bit set.
+        for script in safe-runner.sh explain-command.sh; do
+            if [[ -f "/opt/lucidos-agent/scripts/${script}" ]]; then
+                chmod 755 "/opt/lucidos-agent/scripts/${script}"
+                log "Set chmod 755: /opt/lucidos-agent/scripts/${script}"
+            fi
+        done
+    fi
+    # Logs directory should be writable by all (sticky bit prevents deletion of
+    # other users' files, similar to /tmp)
+    if [[ -d /opt/lucidos-agent/logs ]]; then
+        chmod 1777 /opt/lucidos-agent/logs
+    fi
+    # Policy files — readable by all, writable only by root
+    if [[ -d /opt/lucidos-agent/policy ]]; then
+        chmod 755 /opt/lucidos-agent/policy
+        find /opt/lucidos-agent/policy -name "*.json" -exec chmod 644 {} \;
+    fi
+    log "Agent permissions configured"
+fi
+
+# --------------------------------------------------------------------------
+# 7. Set correct permissions on lucidos-agent binary
+# --------------------------------------------------------------------------
+if [[ -f /usr/local/bin/lucidos-agent ]]; then
+    chmod 755 /usr/local/bin/lucidos-agent
+    log "/usr/local/bin/lucidos-agent is executable"
+fi
+
+if [[ -f /usr/local/bin/lucidos-welcome ]]; then
+    chmod 755 /usr/local/bin/lucidos-welcome
+    log "/usr/local/bin/lucidos-welcome is executable"
+fi
+
+# --------------------------------------------------------------------------
+# 8. Set correct permissions on /etc/lucidos
+# --------------------------------------------------------------------------
+if [[ -d /etc/lucidos ]]; then
+    chmod 755 /etc/lucidos
+    # agent-policy.json: readable by all (agents need to read it)
+    if [[ -f /etc/lucidos/agent-policy.json ]]; then
+        chmod 644 /etc/lucidos/agent-policy.json
+    fi
+    # lucidos.conf: readable by all
+    if [[ -f /etc/lucidos/lucidos.conf ]]; then
+        chmod 644 /etc/lucidos/lucidos.conf
+    fi
+    log "/etc/lucidos permissions configured"
+fi
+
+# --------------------------------------------------------------------------
+# 9. Configure default text editor
+# --------------------------------------------------------------------------
+log "Setting default editor..."
+if command -v update-alternatives &>/dev/null; then
+    # Set nano as the default system editor
+    # Users can change this with: update-alternatives --config editor
+    update-alternatives --set editor /bin/nano 2>/dev/null || true
+fi
+
+# --------------------------------------------------------------------------
+# 10. Create /etc/os-release for LucidOS
+# --------------------------------------------------------------------------
+log "Configuring OS identity..."
+cat > /etc/os-release << 'EOF'
+PRETTY_NAME="LucidOS Alpha 0.1"
+NAME="LucidOS"
+VERSION_ID="0.1"
+VERSION="Alpha 0.1"
+VERSION_CODENAME="glass"
+ID=lucidos
+ID_LIKE=debian
+HOME_URL="https://github.com/your-org/lucidos"
+SUPPORT_URL="https://github.com/your-org/lucidos/issues"
+BUG_REPORT_URL="https://github.com/your-org/lucidos/issues"
+LOGO="lucidos"
+EOF
+
+# Also update /etc/lsb-release for compatibility
+cat > /etc/lsb-release << 'EOF'
+DISTRIB_ID=LucidOS
+DISTRIB_RELEASE=0.1
+DISTRIB_CODENAME=glass
+DISTRIB_DESCRIPTION="LucidOS Alpha 0.1"
+EOF
+
+log "OS identity set to LucidOS Alpha 0.1"
+
+# --------------------------------------------------------------------------
+# 11. Set up desktop backgrounds directory
+# --------------------------------------------------------------------------
+log "Configuring desktop backgrounds..."
+mkdir -p /usr/share/backgrounds
+
+# Ensure the LucidOS wallpaper exists and is readable
+if [[ -f /usr/share/backgrounds/lucidos-wallpaper.svg ]]; then
+    chmod 644 /usr/share/backgrounds/lucidos-wallpaper.svg
+    log "LucidOS wallpaper found and configured"
+else
+    log "WARNING: LucidOS wallpaper not found at /usr/share/backgrounds/lucidos-wallpaper.svg"
+    log "         The desktop will use the default KDE wallpaper"
+fi
+
+# NOTE on KDE Plasma wallpaper skel:
+# The file etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc has been
+# intentionally REMOVED from includes.chroot. The correct format for that file
+# is the full KDE Plasma applet layout (hundreds of lines generated by Plasma
+# on first login), not a simple wallpaper stanza. Placing a partial/incorrect
+# version corrupts the user's KDE session on first login.
+#
+# To set the default wallpaper for new users, the correct approach is to
+# use a plasma-apply-wallpaperimage call in the live-session init or via a
+# KDE autostart script. This is deferred to Alpha 0.2.
+# For Alpha 0.1, new users will see the default KDE Plasma wallpaper.
+# The LucidOS wallpaper is available at /usr/share/backgrounds/ for manual use.
+
+# --------------------------------------------------------------------------
+# 12. Configure Calamares launcher permission
+# --------------------------------------------------------------------------
+# The Install LucidOS desktop file needs to be executable
+INSTALL_DESKTOP="/usr/share/applications/install-lucidos.desktop"
+if [[ -f "$INSTALL_DESKTOP" ]]; then
+    chmod 644 "$INSTALL_DESKTOP"
+    log "Calamares installer desktop file configured"
+fi
+
+# --------------------------------------------------------------------------
+# Done
+# --------------------------------------------------------------------------
+log "LucidOS defaults hook completed successfully."

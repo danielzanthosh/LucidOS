@@ -62,7 +62,7 @@ grub-pc-bin
 grub-efi-amd64-bin
 grub2-common
 grub-common
-eos-prober
+os-prober
 
 # --- Installation support utilities ---
 # Used during the installation process.

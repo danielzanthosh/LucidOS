@@ -34,9 +34,9 @@ calamares-settings-debian
 # --- KDE Partition Manager ---
 # Used by Calamares for disk partitioning.
 # partitionmanager: The GUI application
-# kpmcore: The underlying partition management library
+# partitionmanager pulls libkpmcore12 on Debian Bookworm, so we do not list
+# the library directly here.
 partitionmanager
-kpmcore
 
 # --- Additional partitioning tools ---
 # These are used internally by the partitioning system.
@@ -62,7 +62,7 @@ grub-pc-bin
 grub-efi-amd64-bin
 grub2-common
 grub-common
-os-prober
+eos-prober
 
 # --- Installation support utilities ---
 # Used during the installation process.

@@ -106,6 +106,7 @@ jobs:
                 live-build \
                 debootstrap \
                 squashfs-tools \
+                xz-utils \
                 xorriso \
                 isolinux \
                 syslinux-common \

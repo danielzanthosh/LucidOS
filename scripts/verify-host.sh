@@ -141,6 +141,7 @@ TOOLS=(
     ["lb"]="live-build"
     ["debootstrap"]="debootstrap"
     ["xorriso"]="xorriso"
+    ["xz"]="xz-utils"
     ["mksquashfs"]="squashfs-tools"
     ["git"]="git"
     ["curl"]="curl"
@@ -161,7 +162,7 @@ done
 if [[ "$ALL_TOOLS_OK" == false ]]; then
     echo ""
     info "Install all missing tools with:"
-    info "  sudo apt install live-build debootstrap squashfs-tools xorriso git curl"
+    info "  sudo apt install live-build debootstrap squashfs-tools xz-utils xorriso git curl"
 fi
 
 # Optional tools

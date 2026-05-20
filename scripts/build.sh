@@ -109,7 +109,7 @@ success "live-build found: $(lb --version 2>/dev/null | head -1)"
 # Check 4: Required tools
 # --------------------------------------------------------------------------
 MISSING_TOOLS=()
-for tool in debootstrap xorriso; do
+for tool in debootstrap xorriso xz; do
     if ! command -v "$tool" &>/dev/null; then
         MISSING_TOOLS+=("$tool")
     fi

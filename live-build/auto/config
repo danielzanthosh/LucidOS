@@ -2,144 +2,29 @@
 # =============================================================================
 # LucidOS live-build auto/config
 # =============================================================================
-# This file is automatically sourced by 'lb config' when run from the
-# live-build directory. It sets all the configuration options for building
-# the LucidOS ISO.
-#
-# Usage:
-#   cd live-build && lb config
-#   (This is called automatically by scripts/build.sh)
-#
-# Documentation:
-#   live-build manual: https://live-team.pages.debian.net/live-manual/
-#   lb_config man page: man lb_config
-#
-# How this works:
-#   lb config reads this file and passes all arguments to the lb config
-#   command. The resulting configuration is written to config/ directory.
+# This script is executed by lb config from the live-build directory.
+# Keep it to options supported by the live-build version used in CI.
 # =============================================================================
 
 set -e
 
 lb config noauto \
-    \
-    `# ---------------------------------------------------------------` \
-    `# Distribution settings` \
-    `# ---------------------------------------------------------------` \
-    \
-    `# Build target: Debian 12 Bookworm.` \
-    `# NOTE: As of 2026, Debian stable is Trixie (13). This project is` \
-    `# intentionally pinned to Bookworm because the current package lists` \
-    `# target Plasma 5 / Calamares packages known to exist there. Moving to` \
-    `# Trixie requires a separate Plasma 6 package audit.` \
     --distribution "bookworm" \
-    \
-    `# Target architecture: x86_64 (modern 64-bit PCs)` \
     --architectures "amd64" \
-    \
-    `# ---------------------------------------------------------------` \
-    `# Package repository settings` \
-    `# ---------------------------------------------------------------` \
-    \
-    `# Use the official Debian mirror` \
-    `# Change this to a mirror closer to you for faster builds:` \
-    `# https://www.debian.org/mirror/list` \
     --mirror-bootstrap "http://deb.debian.org/debian/" \
     --mirror-chroot "http://deb.debian.org/debian/" \
     --mirror-binary "http://deb.debian.org/debian/" \
-    \
-    `# Archive areas:` \
-    `# - main: fully free software (required)` \
-    `# - contrib: free software that depends on non-free (optional)` \
-    `# - non-free-firmware: hardware firmware (needed for Wi-Fi, GPU, etc.)` \
     --archive-areas "main contrib non-free-firmware" \
-    \
-    `# Also use security and updates repositories in the final image` \
     --mirror-binary-security "http://security.debian.org/debian-security/" \
     --mirror-chroot-security "http://security.debian.org/debian-security/" \
-    \
-    `# ---------------------------------------------------------------` \
-    `# Image type settings` \
-    `# ---------------------------------------------------------------` \
-    \
-    `# Build an ISO hybrid image` \
-    `# 'iso-hybrid' means the ISO can be written directly to USB with dd` \
-    `# and still boot from both BIOS and UEFI` \
     --binary-images "iso-hybrid" \
-    \
-    `# ---------------------------------------------------------------` \
-    `# Live system settings` \
-    `# ---------------------------------------------------------------` \
-    \
-    `# Default hostname for the live session` \
-    --hostname "lucidos" \
-    \
-    `# Default username for the live session` \
-    `# The live user will be created automatically by live-config` \
-    --username "lucid" \
-    \
-    `# Set the full name for the live user` \
-    --name "Lucid User" \
-    \
-    `# ---------------------------------------------------------------` \
-    `# Boot settings` \
-    `# ---------------------------------------------------------------` \
-    \
-    `# Boot parameters appended to the kernel command line` \
-    `# quiet: suppress most boot messages` \
-    `# splash: show a splash screen during boot (requires Plymouth)` \
-    `# locales: set default locale to en_US.UTF-8` \
-    `# keyboard-layouts: set default keyboard layout` \
-    --bootappend-live "boot=live components quiet splash locales=en_US.UTF-8 keyboard-layouts=us" \
-    \
-    `# Boot parameters for the installer` \
+    --bootappend-live "boot=live components quiet splash hostname=lucidos username=lucid locales=en_US.UTF-8 keyboard-layouts=us" \
     --bootappend-install "quiet" \
-    \
-    `# ---------------------------------------------------------------` \
-    `# Bootloader settings` \
-    `# ---------------------------------------------------------------` \
-    \
-    `# Use isolinux for BIOS boot and GRUB for UEFI boot` \
-    `# This gives maximum hardware compatibility` \
-    --bootloaders "syslinux grub-efi" \
-    \
-    `# ---------------------------------------------------------------` \
-    `# Compression settings` \
-    `# ---------------------------------------------------------------` \
-    \
-    `# Compression algorithm for the squashfs filesystem` \
-    `# xz gives smaller ISOs but slower build; zstd is faster but larger` \
-    `# For production, use xz; for testing, use zstd` \
     --compression "xz" \
-    \
-    `# ---------------------------------------------------------------` \
-    `# Desktop/init settings` \
-    `# ---------------------------------------------------------------` \
-    \
-    `# Use systemd as the init system (default for modern Debian)` \
-    --init-system "systemd" \
-    \
-    `# ---------------------------------------------------------------` \
-    `# Cache settings` \
-    `# ---------------------------------------------------------------` \
-    \
-    `# Cache downloaded packages to speed up subsequent builds` \
-    `# Delete with: lb clean --cache` \
     --cache "true" \
-    \
-    `# ---------------------------------------------------------------` \
-    `# Metadata` \
-    `# ---------------------------------------------------------------` \
-    \
-    `# ISO volume label (visible when mounting or in boot menus)` \
     --iso-volume "LucidOS" \
-    \
-    `# ISO application ID` \
     --iso-application "LucidOS Alpha 0.1" \
-    \
-    `# ISO publisher` \
     --iso-publisher "LucidOS Project" \
-    \
     "${@}"
 
 echo ""

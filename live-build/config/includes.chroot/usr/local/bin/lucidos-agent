@@ -1,0 +1,375 @@
+#!/usr/bin/env bash
+# =============================================================================
+# LucidOS Agent — /usr/local/bin/lucidos-agent
+# =============================================================================
+# The main entry point for the Lucid Agent, LucidOS's agentic AI assistant.
+#
+# CURRENT STATUS: Alpha 0.1 — Terminal Placeholder
+#
+# This is a functional placeholder that:
+# - Shows a welcome banner
+# - Explains what the Lucid Agent will become
+# - Provides an interactive command loop
+# - Routes commands through safe-runner.sh (the security gateway)
+# - Can explain commands before running them
+#
+# FUTURE (Alpha 0.3):
+# - Real AI backend integration (local LLM or cloud API)
+# - GUI interface (Qt/QML application)
+# - Task automation workflows
+# - Plugin system
+#
+# USAGE:
+#   lucidos-agent              # Start the interactive agent
+#   lucidos-agent --version    # Show version information
+#   lucidos-agent --help       # Show help
+#
+# DESIGN NOTES:
+# - Never uses eval for security reasons
+# - All commands go through safe-runner.sh
+# - No root access is requested
+# - All actions are logged
+# =============================================================================
+
+set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+AGENT_VERSION="0.1.0"
+AGENT_NAME="Lucid Agent"
+AGENT_DIR="/opt/lucidos-agent"
+SAFE_RUNNER="${AGENT_DIR}/scripts/safe-runner.sh"
+EXPLAINER="${AGENT_DIR}/scripts/explain-command.sh"
+CONFIG_FILE="/etc/lucidos/lucidos.conf"
+
+# ---------------------------------------------------------------------------
+# ANSI colors
+# ---------------------------------------------------------------------------
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+BOLD='\033[1m'
+DIM='\033[2m'
+RESET='\033[0m'
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+print_divider() {
+    echo -e "${DIM}──────────────────────────────────────────────────────────${RESET}"
+}
+
+# ---------------------------------------------------------------------------
+# Argument handling
+# ---------------------------------------------------------------------------
+case "${1:-}" in
+    --version|-v)
+        echo "Lucid Agent version ${AGENT_VERSION}"
+        echo "LucidOS Alpha 0.1"
+        exit 0
+        ;;
+    --help|-h)
+        echo ""
+        echo -e "${BOLD}Lucid Agent${RESET} — Safe agentic assistant for LucidOS"
+        echo ""
+        echo "Usage: lucidos-agent [OPTION]"
+        echo ""
+        echo "Options:"
+        echo "  --help, -h      Show this help message"
+        echo "  --version, -v   Show version information"
+        echo "  (none)          Start the interactive agent"
+        echo ""
+        echo "Interactive commands:"
+        echo "  run <cmd>       Run a command through the safe runner"
+        echo "  explain <cmd>   Explain what a command does before running it"
+        echo "  log             Show recent action log"
+        echo "  policy          Show the current command policy"
+        echo "  help            Show agent help"
+        echo "  exit / quit     Exit the agent"
+        echo ""
+        exit 0
+        ;;
+esac
+
+# ---------------------------------------------------------------------------
+# Welcome Banner
+# ---------------------------------------------------------------------------
+clear
+
+echo ""
+echo -e "${BOLD}${CYAN}"
+echo "  ╔══════════════════════════════════════════════════════════╗"
+echo "  ║                                                          ║"
+echo "  ║    🌟  L U C I D   A G E N T                            ║"
+echo "  ║                                                          ║"
+echo "  ║    Safe Local Agentic Assistant for LucidOS             ║"
+echo "  ║    Version ${AGENT_VERSION} — Alpha 0.1                          ║"
+echo "  ║                                                          ║"
+echo "  ╚══════════════════════════════════════════════════════════╝"
+echo -e "${RESET}"
+
+echo -e "${DIM}Running as: $(whoami) | Host: $(hostname) | $(date '+%A, %B %d %Y')${RESET}"
+echo ""
+
+# ---------------------------------------------------------------------------
+# Alpha Notice
+# ---------------------------------------------------------------------------
+echo -e "${YELLOW}╔─ Alpha 0.1 Notice ──────────────────────────────────────────╗${RESET}"
+echo -e "${YELLOW}│${RESET} The Lucid Agent is currently a safe placeholder.            ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET}                                                             ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET} ${BOLD}What this does now:${RESET}                                          ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET}   • Accepts commands and routes them through safe-runner.sh ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET}   • Classifies commands (safe/confirm/blocked)               ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET}   • Explains commands before execution                       ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET}   • Logs all actions                                         ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET}                                                             ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET} ${BOLD}Coming in Alpha 0.3:${RESET}                                         ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET}   • Real AI backend (local LLM or cloud API)                ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET}   • Task automation workflows                                ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET}   • GUI application                                          ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET}                                                             ${YELLOW}│${RESET}"
+echo -e "${YELLOW}│${RESET} See /opt/lucidos-agent/README.md for details.               ${YELLOW}│${RESET}"
+echo -e "${YELLOW}╚─────────────────────────────────────────────────────────────╝${RESET}"
+echo ""
+
+# ---------------------------------------------------------------------------
+# Quick examples
+# ---------------------------------------------------------------------------
+echo -e "${BOLD}Example commands:${RESET}"
+echo ""
+echo -e "  ${GREEN}run ls -la${RESET}              — List files safely"
+echo -e "  ${GREEN}run df -h${RESET}               — Show disk space"
+echo -e "  ${YELLOW}run apt install htop${RESET}    — Install a package (requires confirmation)"
+echo -e "  ${BLUE}explain apt upgrade${RESET}     — Explain a command before running"
+echo -e "  ${CYAN}log${RESET}                     — Show recent action log"
+echo -e "  ${CYAN}policy${RESET}                  — Show command permission policy"
+echo -e "  ${RED}help${RESET}                    — Show all available commands"
+echo -e "  ${DIM}exit${RESET}                    — Exit the agent"
+echo ""
+print_divider
+
+# ---------------------------------------------------------------------------
+# Main interactive loop
+# ---------------------------------------------------------------------------
+while true; do
+    echo ""
+    # Show a simple prompt
+    echo -ne "${BOLD}${CYAN}lucid-agent${RESET}${DIM}@${RESET}${MAGENTA}$(hostname)${RESET} > "
+    read -r INPUT
+
+    # Handle empty input
+    if [[ -z "${INPUT// }" ]]; then
+        continue
+    fi
+
+    # Parse the first word as the command
+    AGENT_CMD=$(echo "$INPUT" | awk '{print $1}')
+    AGENT_ARGS=$(echo "$INPUT" | cut -d' ' -f2-)
+
+    # If args equals the command (no args given), clear it
+    if [[ "$AGENT_ARGS" == "$AGENT_CMD" ]]; then
+        AGENT_ARGS=""
+    fi
+
+    case "$AGENT_CMD" in
+
+        # ------------------------------------------------------------------
+        # 'run' — execute a command through safe-runner.sh
+        # ------------------------------------------------------------------
+        run)
+            if [[ -z "$AGENT_ARGS" ]]; then
+                echo -e "  ${YELLOW}Usage: run <command>${RESET}"
+                echo -e "  Example: run ls -la"
+                continue
+            fi
+
+            if [[ ! -f "$SAFE_RUNNER" ]]; then
+                echo -e "  ${RED}Error:${RESET} safe-runner.sh not found at ${SAFE_RUNNER}"
+                echo "  The agent installation may be incomplete."
+                continue
+            fi
+
+            bash "$SAFE_RUNNER" "$AGENT_ARGS"
+            ;;
+
+        # ------------------------------------------------------------------
+        # 'explain' — explain a command without running it
+        # ------------------------------------------------------------------
+        explain)
+            if [[ -z "$AGENT_ARGS" ]]; then
+                echo -e "  ${YELLOW}Usage: explain <command>${RESET}"
+                echo -e "  Example: explain apt install htop"
+                continue
+            fi
+
+            if [[ -f "$EXPLAINER" ]]; then
+                bash "$EXPLAINER" "$AGENT_ARGS"
+            else
+                echo -e "  ${YELLOW}Note:${RESET} explain-command.sh not found."
+                echo "  Try: man $(echo "$AGENT_ARGS" | awk '{print $1}')"
+            fi
+            ;;
+
+        # ------------------------------------------------------------------
+        # 'run-explained' — explain then optionally run
+        # ------------------------------------------------------------------
+        explain-run|run-explained)
+            if [[ -z "$AGENT_ARGS" ]]; then
+                echo -e "  ${YELLOW}Usage: explain-run <command>${RESET}"
+                continue
+            fi
+
+            # First explain
+            if [[ -f "$EXPLAINER" ]]; then
+                bash "$EXPLAINER" "$AGENT_ARGS"
+            fi
+
+            # Then ask if they want to run it
+            echo ""
+            echo -ne "  ${BOLD}Run this command? [y/N]:${RESET} "
+            read -r RUN_CONFIRM
+            if [[ "$RUN_CONFIRM" == "y" || "$RUN_CONFIRM" == "Y" ]]; then
+                bash "$SAFE_RUNNER" "$AGENT_ARGS"
+            else
+                echo "  Cancelled."
+            fi
+            ;;
+
+        # ------------------------------------------------------------------
+        # 'log' — show the action log
+        # ------------------------------------------------------------------
+        log)
+            LOG_FILE="${AGENT_DIR}/logs/actions.log"
+            FALLBACK_LOG="/tmp/lucidos-agent-actions.log"
+
+            if [[ -f "$LOG_FILE" ]]; then
+                echo -e "  ${BOLD}Recent Agent Actions:${RESET} (${LOG_FILE})"
+                echo ""
+                tail -20 "$LOG_FILE" | sed 's/^/  /'
+            elif [[ -f "$FALLBACK_LOG" ]]; then
+                echo -e "  ${YELLOW}Using fallback log:${RESET} ${FALLBACK_LOG}"
+                tail -20 "$FALLBACK_LOG" | sed 's/^/  /'
+            else
+                echo "  No actions logged yet."
+                echo "  Run some commands first (try: run ls)"
+            fi
+            ;;
+
+        # ------------------------------------------------------------------
+        # 'policy' — show the command permission policy
+        # ------------------------------------------------------------------
+        policy)
+            POLICY_FILE="/etc/lucidos/agent-policy.json"
+            if [[ -f "$POLICY_FILE" ]]; then
+                echo -e "  ${BOLD}Current Agent Policy:${RESET} ${POLICY_FILE}"
+                echo ""
+                echo "  Command Categories:"
+                echo ""
+                echo -e "  ${GREEN}ALLOWED${RESET} (no confirmation needed):"
+                echo "    pwd, whoami, uname, ls, df, free, ps, echo, grep, man, ..."
+                echo ""
+                echo -e "  ${YELLOW}REQUIRES CONFIRMATION${RESET}:"
+                echo "    apt, systemctl, git clone, npm install, pip install,"
+                echo "    chmod, chown, mv, rm, curl, wget, ..."
+                echo ""
+                echo -e "  ${RED}BLOCKED${RESET} (never allowed):"
+                echo "    rm -rf /, mkfs, shred, userdel, dd if=, passwd root,"
+                echo "    curl|bash, wget|bash, /dev/sda, /etc/shadow, ..."
+                echo ""
+                echo "  Full policy: ${POLICY_FILE}"
+                echo "  Agent policy: ${AGENT_DIR}/policy/default-policy.json"
+            else
+                echo "  Policy file not found: ${POLICY_FILE}"
+            fi
+            ;;
+
+        # ------------------------------------------------------------------
+        # 'sysinfo' — show system information
+        # ------------------------------------------------------------------
+        sysinfo|info|status)
+            echo ""
+            echo -e "  ${BOLD}System Information:${RESET}"
+            echo ""
+            bash "$SAFE_RUNNER" "uname -a" 2>/dev/null || uname -a
+            echo ""
+            bash "$SAFE_RUNNER" "df -h" 2>/dev/null || df -h
+            echo ""
+            bash "$SAFE_RUNNER" "free -h" 2>/dev/null || free -h
+            ;;
+
+        # ------------------------------------------------------------------
+        # 'welcome' — show the welcome message
+        # ------------------------------------------------------------------
+        welcome)
+            WELCOME_FILE="/usr/share/lucidos/welcome.md"
+            if [[ -f "$WELCOME_FILE" ]]; then
+                cat "$WELCOME_FILE"
+            else
+                echo "  Welcome to LucidOS Alpha 0.1!"
+                echo "  Type 'help' for available commands."
+            fi
+            ;;
+
+        # ------------------------------------------------------------------
+        # 'help' — show all available commands
+        # ------------------------------------------------------------------
+        help|?)
+            echo ""
+            echo -e "  ${BOLD}Lucid Agent — Available Commands${RESET}"
+            print_divider
+            echo ""
+            echo -e "  ${GREEN}run${RESET} <command>         — Run a shell command safely"
+            echo -e "  ${BLUE}explain${RESET} <command>     — Explain a command without running it"
+            echo -e "  ${BLUE}explain-run${RESET} <command> — Explain then optionally run a command"
+            echo -e "  ${CYAN}log${RESET}                   — Show recent action log"
+            echo -e "  ${CYAN}policy${RESET}                — Show command permission policy"
+            echo -e "  ${CYAN}sysinfo${RESET}               — Show system information"
+            echo -e "  ${CYAN}welcome${RESET}               — Show the LucidOS welcome message"
+            echo -e "  ${CYAN}help${RESET}                  — Show this help message"
+            echo -e "  ${DIM}exit / quit${RESET}           — Exit the agent"
+            echo ""
+            echo "  Examples:"
+            echo -e "    ${DIM}run ls -la /home${RESET}"
+            echo -e "    ${DIM}run apt install neofetch${RESET}"
+            echo -e "    ${DIM}explain systemctl restart NetworkManager${RESET}"
+            echo ""
+            echo "  Note: Commands typed without 'run' prefix are not executed."
+            echo "  Always use 'run' to execute shell commands."
+            echo ""
+            echo -e "  ${YELLOW}Alpha 0.1:${RESET} Direct AI task requests coming in Alpha 0.3."
+            ;;
+
+        # ------------------------------------------------------------------
+        # 'exit' / 'quit' — exit the agent
+        # ------------------------------------------------------------------
+        exit|quit|q|bye)
+            echo ""
+            echo -e "  ${CYAN}Goodbye! Stay lucid. 🌟${RESET}"
+            echo ""
+            exit 0
+            ;;
+
+        # ------------------------------------------------------------------
+        # Unknown command
+        # ------------------------------------------------------------------
+        *)
+            echo ""
+            echo -e "  ${YELLOW}Unknown agent command:${RESET} ${AGENT_CMD}"
+            echo ""
+            echo "  Did you mean: run ${INPUT}"
+            echo -ne "  Execute 'run ${INPUT}'? [y/N]: "
+            read -r QUICK_CONFIRM
+            if [[ "$QUICK_CONFIRM" == "y" || "$QUICK_CONFIRM" == "Y" ]]; then
+                bash "$SAFE_RUNNER" "$INPUT"
+            else
+                echo "  Type 'help' for available commands."
+            fi
+            ;;
+
+    esac
+
+done

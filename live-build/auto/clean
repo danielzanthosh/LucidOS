@@ -1,0 +1,14 @@
+#!/bin/sh
+# =============================================================================
+# LucidOS live-build auto/clean
+# =============================================================================
+# Called by 'lb clean'. Cleans up build artifacts.
+# You do not normally need to modify this file.
+#
+# For a more user-friendly clean interface, use:
+#   bash scripts/clean.sh
+# =============================================================================
+
+set -e
+
+lb clean noauto "${@}"

@@ -1,4 +1,5 @@
 name: Build LucidOS ISO
+# LucidOS Alpha 0.1 ISO build workflow
 
 on:
   workflow_dispatch:

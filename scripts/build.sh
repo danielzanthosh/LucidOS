@@ -44,6 +44,12 @@ LIVE_BUILD_DIR="${PROJECT_ROOT}/live-build"
 DIST_DIR="${PROJECT_ROOT}/dist"
 ISO_NAME="lucidos-alpha-0.1-amd64.iso"
 
+if [[ "${EUID}" -eq 0 ]]; then
+    RUN_LB_BUILD=(lb build)
+else
+    RUN_LB_BUILD=(sudo lb build)
+fi
+
 # --------------------------------------------------------------------------
 # Banner
 # --------------------------------------------------------------------------
@@ -79,7 +85,7 @@ success "Running on Linux: $(uname -r)"
 # --------------------------------------------------------------------------
 # Check 2: Not running as root directly (live-build needs sudo for lb build)
 # --------------------------------------------------------------------------
-if [[ "$EUID" -eq 0 ]]; then
+if [[ "${EUID}" -eq 0 ]]; then
     warn "Running as root. This is allowed but not recommended."
     warn "Prefer running as a regular user with sudo access."
 fi
@@ -146,6 +152,14 @@ header "Preparing output directory"
 mkdir -p "${DIST_DIR}"
 success "Output directory ready: ${DIST_DIR}"
 
+header "Clearing stale live-build outputs"
+rm -rf "${LIVE_BUILD_DIR}/chroot" \
+       "${LIVE_BUILD_DIR}/binary" \
+       "${LIVE_BUILD_DIR}/build" \
+       "${LIVE_BUILD_DIR}/cache"
+rm -f "${LIVE_BUILD_DIR}"/*.iso "${LIVE_BUILD_DIR}/build.log" 2>/dev/null || true
+success "Stale live-build outputs cleared"
+
 # live-build auto scripts and hooks must be executable on Linux. If this tree
 # was copied from Windows, the executable bits may be missing even though the
 # shebangs are correct.
@@ -153,9 +167,15 @@ header "Normalizing live-build file permissions"
 chmod 755 "${LIVE_BUILD_DIR}/auto/config" \
           "${LIVE_BUILD_DIR}/auto/build" \
           "${LIVE_BUILD_DIR}/auto/clean"
-find "${LIVE_BUILD_DIR}/config/hooks" -type f -name "*.hook.*" -exec chmod 755 {} \;
-find "${LIVE_BUILD_DIR}/config/includes.chroot/usr/local/bin" -type f -exec chmod 755 {} \;
-find "${LIVE_BUILD_DIR}/config/includes.chroot/opt/lucidos-agent/scripts" -type f -name "*.sh" -exec chmod 755 {} \;
+if [[ -d "${LIVE_BUILD_DIR}/config/hooks" ]]; then
+    find "${LIVE_BUILD_DIR}/config/hooks" -type f -name "*.hook.*" -exec chmod 755 {} \;
+fi
+if [[ -d "${LIVE_BUILD_DIR}/config/includes.chroot/usr/local/bin" ]]; then
+    find "${LIVE_BUILD_DIR}/config/includes.chroot/usr/local/bin" -type f -exec chmod 755 {} \;
+fi
+if [[ -d "${LIVE_BUILD_DIR}/config/includes.chroot/opt/lucidos-agent/scripts" ]]; then
+    find "${LIVE_BUILD_DIR}/config/includes.chroot/opt/lucidos-agent/scripts" -type f -name "*.sh" -exec chmod 755 {} \;
+fi
 if [[ -f "${LIVE_BUILD_DIR}/config/includes.chroot/etc/sudoers.d/lucidos-live" ]]; then
     chmod 440 "${LIVE_BUILD_DIR}/config/includes.chroot/etc/sudoers.d/lucidos-live"
 else
@@ -174,7 +194,7 @@ info "(This reads auto/config and applies settings)"
 echo ""
 
 # lb config does NOT need sudo — it only writes config files.
-# Only 'lb build' requires sudo (for chroot and mount operations).
+# Only 'lb build' may require elevation (for chroot and mount operations).
 # Running lb config with sudo can cause permission issues on config files.
 if lb config; then
     success "live-build configured successfully"
@@ -195,7 +215,7 @@ echo ""
 
 START_TIME=$(date +%s)
 
-if sudo lb build 2>&1 | tee "${LIVE_BUILD_DIR}/build.log"; then
+if "${RUN_LB_BUILD[@]}" 2>&1 | tee "${LIVE_BUILD_DIR}/build.log"; then
     END_TIME=$(date +%s)
     ELAPSED=$(( END_TIME - START_TIME ))
     ELAPSED_MIN=$(( ELAPSED / 60 ))
@@ -238,9 +258,9 @@ success "ISO ready: ${DEST_ISO} (${ISO_SIZE})"
 # Done
 # --------------------------------------------------------------------------
 echo ""
-echo -e "${BOLD}${GREEN}╔══════════════════════════════════════════════════════╗${RESET}"
+echo -e "${BOLD}${GREEN}╔════════════════════════════════════════════════════╗${RESET}"
 echo -e "${BOLD}${GREEN}║          LucidOS ISO Build Complete!                 ║${RESET}"
-echo -e "${BOLD}${GREEN}╚══════════════════════════════════════════════════════╝${RESET}"
+echo -e "${BOLD}${GREEN}╚════════════════════════════════════════════════════╝${RESET}"
 echo ""
 echo "  ISO:  ${DEST_ISO}"
 echo "  Size: ${ISO_SIZE}"

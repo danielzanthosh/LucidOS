@@ -9,6 +9,7 @@
 set -e
 
 lb config noauto \
+    --mode "debian" \
     --distribution "bookworm" \
     --architectures "amd64" \
     --mirror-bootstrap "http://deb.debian.org/debian/" \

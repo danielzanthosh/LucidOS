@@ -156,7 +156,11 @@ chmod 755 "${LIVE_BUILD_DIR}/auto/config" \
 find "${LIVE_BUILD_DIR}/config/hooks" -type f -name "*.hook.*" -exec chmod 755 {} \;
 find "${LIVE_BUILD_DIR}/config/includes.chroot/usr/local/bin" -type f -exec chmod 755 {} \;
 find "${LIVE_BUILD_DIR}/config/includes.chroot/opt/lucidos-agent/scripts" -type f -name "*.sh" -exec chmod 755 {} \;
-chmod 440 "${LIVE_BUILD_DIR}/config/includes.chroot/etc/sudoers.d/lucidos-live"
+if [[ -f "${LIVE_BUILD_DIR}/config/includes.chroot/etc/sudoers.d/lucidos-live" ]]; then
+    chmod 440 "${LIVE_BUILD_DIR}/config/includes.chroot/etc/sudoers.d/lucidos-live"
+else
+    warn "sudoers file not found; continuing without chmod"
+fi
 success "live-build scripts, hooks, launchers, and sudoers permissions normalized"
 
 # --------------------------------------------------------------------------

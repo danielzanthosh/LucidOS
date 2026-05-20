@@ -46,7 +46,7 @@ dolphin
 konsole
 kate
 ark
-spectacle
+kde-spectacle
 gwenview
 okular
 kcalc
@@ -107,7 +107,8 @@ kde-config-gtk-style-preview
 # These provide additional widgets and effects.
 plasma-widgets-addons
 plasma-dataengines-addons
-kdeplasma-addons
+# kdeplasma-addons is the source/package family name. The Bookworm runtime
+# package we actually want is plasma-widgets-addons, already listed above.
 
 # --- File manager extras ---
 # Extra functionality for Dolphin (file manager).

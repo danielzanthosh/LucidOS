@@ -45,6 +45,14 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 LIVE_BUILD_DIR="${PROJECT_ROOT}/live-build"
 DIST_DIR="${PROJECT_ROOT}/dist"
 
+if [[ "${EUID}" -eq 0 ]]; then
+    RUN_LB_CLEAN=(lb clean)
+    RUN_LB_CLEAN_ALL=(lb clean --all)
+else
+    RUN_LB_CLEAN=(sudo lb clean)
+    RUN_LB_CLEAN_ALL=(sudo lb clean --all)
+fi
+
 # Parse arguments
 CLEAN_CACHE=false
 CLEAN_DIST=false
@@ -131,9 +139,9 @@ cd "${LIVE_BUILD_DIR}"
 if [[ "$MANUAL_CLEAN" == false ]]; then
     # Use lb clean for proper cleanup
     if [[ "$CLEAN_CACHE" == true ]]; then
-        sudo lb clean --all
+        "${RUN_LB_CLEAN_ALL[@]}"
     else
-        sudo lb clean
+        "${RUN_LB_CLEAN[@]}"
     fi
     success "lb clean completed"
 else

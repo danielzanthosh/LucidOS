@@ -111,6 +111,7 @@ jobs:
                 syslinux-common \
                 qemu-system-x86 \
                 ovmf
+              bash scripts/verify-packages.sh
               bash scripts/verify-host.sh
               bash scripts/build.sh
             '

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Lucid Agent
+GenericName=AI Assistant
+Comment=Safe local agentic assistant shell for LucidOS
+Exec=konsole -e lucidos-agent
+Icon=utilities-terminal
+Terminal=false
+Categories=System;Utility;
+Keywords=agent;ai;assistant;lucid;automation;
+StartupNotify=true
+X-KDE-SubstituteUID=false

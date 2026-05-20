@@ -1,0 +1,131 @@
+# =============================================================================
+# LucidOS Core Package List
+# =============================================================================
+# File: config/package-lists/lucidos-core.list.chroot
+#
+# These are the essential system packages that form the foundation of the
+# LucidOS live system. Without these, the system would not boot properly
+# or would lack critical functionality.
+#
+# Format: One package per line. Lines starting with # are comments.
+# Blank lines are ignored.
+# =============================================================================
+
+# --- Kernel ---
+# The Debian stable kernel for amd64.
+# live-boot provides the live system boot scripts.
+# live-config sets up the live user, hostname, etc. on first boot.
+linux-image-amd64
+live-boot
+live-config
+live-config-systemd
+
+# --- Base system essentials ---
+# These packages form the minimal usable system.
+sudo
+systemd
+systemd-sysv
+dbus
+dbus-user-session
+udev
+locales
+tzdata
+keyboard-configuration
+console-setup
+
+# --- Networking ---
+# NetworkManager provides the network stack and the KDE plasma-nm applet.
+# wireless-tools provides iwconfig and other wireless utilities.
+# wpasupplicant handles WPA/WPA2 Wi-Fi authentication.
+# network-manager-gnome provides nm-applet as a fallback.
+network-manager
+network-manager-gnome
+wireless-tools
+wpasupplicant
+iw
+rfkill
+net-tools
+iputils-ping
+iproute2
+
+# --- Firmware ---
+# Free firmware for common hardware.
+# firmware-linux-nonfree is in non-free-firmware and needed for many GPUs/Wi-Fi cards.
+# These should be available with --archive-areas "main contrib non-free-firmware"
+firmware-linux-free
+firmware-linux-nonfree
+firmware-amd-graphics
+firmware-iwlwifi
+firmware-realtek
+firmware-atheros
+firmware-brcm80211
+
+# --- Essential utilities ---
+# Standard tools that most users expect to have available.
+curl
+wget
+git
+nano
+vim
+htop
+unzip
+zip
+bzip2
+xz-utils
+tar
+rsync
+less
+man-db
+bash-completion
+file
+lsof
+psmisc
+procps
+util-linux
+
+# --- Security and certificates ---
+# Required for HTTPS and package verification.
+ca-certificates
+gnupg
+gnupg2
+apt-transport-https
+openssl
+
+# --- Hardware support ---
+# Tools for hardware detection and management.
+pciutils
+usbutils
+lshw
+dmidecode
+inxi
+
+# --- Audio ---
+# PipeWire is the modern audio system, replacing PulseAudio.
+pipewire
+pipewire-pulse
+pipewire-alsa
+wireplumber
+alsa-utils
+
+# --- Bluetooth ---
+bluez
+blueman
+
+# --- Printing (optional but useful) ---
+# cups
+# system-config-printer
+
+# --- Display server foundation ---
+# Xorg display server and required utilities.
+xorg
+xserver-xorg
+xserver-xorg-input-all
+xserver-xorg-video-all
+x11-xserver-utils
+x11-utils
+xterm
+
+# --- Power management ---
+upower
+acpi
+acpid

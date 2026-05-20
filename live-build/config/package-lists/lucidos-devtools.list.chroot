@@ -1,0 +1,134 @@
+# =============================================================================
+# LucidOS Developer Tools Package List
+# =============================================================================
+# File: config/package-lists/lucidos-devtools.list.chroot
+#
+# Development tools included in the LucidOS default installation.
+# These support the agentic assistant layer and general development use.
+#
+# Philosophy:
+# - Include tools that are useful for most developers
+# - Do NOT include IDE-scale packages (VSCode, JetBrains, etc.) by default
+#   — these can be installed by the user after installation
+# - Include Python and Node.js as they are needed by the Lucid Agent future layers
+# - Keep the ISO size reasonable
+#
+# Note on Rust (rustc/cargo):
+#   Rust is available in Debian bookworm stable, but the version may be older
+#   than what many Rust developers prefer. If you need a newer Rust, install
+#   via rustup after booting: https://rustup.rs/
+#   The Debian package versions are commented out below — uncomment if desired.
+# =============================================================================
+
+# --- Build essentials ---
+# Standard C/C++ compilation tools.
+build-essential
+make
+cmake
+gcc
+g++
+pkg-config
+autoconf
+automake
+
+# --- Python ---
+# Python 3 with pip for scripting and the future agent layer.
+python3
+python3-pip
+python3-venv
+python3-dev
+python3-setuptools
+python3-wheel
+
+# --- Python utilities ---
+# Useful Python tools available in Debian repos.
+python3-requests
+python3-yaml
+python3-toml
+
+# --- Node.js and npm ---
+# For JavaScript/TypeScript development and the future agent web interface.
+# Note: Debian stable may have an older Node.js version.
+# For a newer version, consider using nvm or NodeSource after install.
+nodejs
+npm
+
+# --- Version control ---
+# git is in the core list, these are extras.
+git-lfs
+
+# --- Text editors and IDE support ---
+# nano and vim are in core. These are additional editor tools.
+# neovim  # Uncomment if you want Neovim
+# emacs   # Uncomment if you want Emacs
+
+# --- Terminal multiplexer ---
+tmux
+screen
+
+# --- Debugging tools ---
+gdb
+strace
+ltrace
+valgrind
+
+# --- Network development tools ---
+netcat-openbsd
+socat
+tcpdump
+nmap
+traceroute
+dnsutils
+
+# --- Container tools ---
+# Docker is not included by default (requires separate repo setup).
+# Users can install it post-boot following Docker's official docs.
+# podman  # Uncomment to include Podman (OCI container runtime)
+
+# --- Flatpak ---
+# Flatpak allows installing sandboxed applications.
+# Useful for apps not in Debian repos (e.g., newer software).
+# Uncomment to include Flatpak:
+# flatpak
+# Note: After enabling, add Flathub: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+# --- Rust (Debian package — may be older than rustup version) ---
+# The Debian bookworm packages:
+# rustc   — the Rust compiler
+# cargo   — the Rust package manager
+# These may be significantly older than the latest stable Rust.
+# If you need cutting-edge Rust, use rustup instead:
+#   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Uncomment below to include Debian's Rust packages:
+# rustc
+# cargo
+
+# --- System monitoring and performance ---
+iotop
+iftop
+nethogs
+sysstat
+glances
+
+# --- File and text tools ---
+jq
+ripgrep
+fd-find
+tree
+# bat — NOT available in Debian Bookworm stable repos.
+# Install manually after boot: cargo install bat
+# Or enable backports once bat is added.
+# bat
+
+# --- JSON and YAML tools ---
+# jq is listed above. These are additional useful tools.
+yq
+
+# --- Hex/binary tools ---
+# hexyl — NOT available in Debian Bookworm stable repos.
+# Install manually after boot: cargo install hexyl
+# hexyl
+xxd
+
+# --- Code format / lint helpers ---
+shellcheck

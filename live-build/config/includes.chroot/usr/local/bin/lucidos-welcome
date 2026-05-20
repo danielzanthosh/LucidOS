@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# =============================================================================
+# LucidOS Welcome — /usr/local/bin/lucidos-welcome
+# =============================================================================
+# Displays the LucidOS welcome message in the terminal.
+# Called from .bashrc on first login, or can be run manually.
+#
+# Usage:
+#   lucidos-welcome          # Show welcome message
+#   lucidos-welcome --brief  # Show brief one-liner
+# =============================================================================
+
+set -euo pipefail
+
+WELCOME_FILE="/usr/share/lucidos/welcome.md"
+
+BOLD='\033[1m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RESET='\033[0m'
+
+case "${1:-}" in
+    --brief|-b)
+        echo -e "${CYAN}Welcome to LucidOS Alpha 0.1!${RESET} Type ${BOLD}lucidos-agent${RESET} to launch the AI assistant."
+        exit 0
+        ;;
+esac
+
+echo ""
+echo -e "${BOLD}${CYAN}"
+echo "  ╔═══════════════════════════════════════╗"
+echo "  ║   Welcome to LucidOS Alpha 0.1  🌟   ║"
+echo "  ╚═══════════════════════════════════════╝"
+echo -e "${RESET}"
+
+if [[ -f "$WELCOME_FILE" ]]; then
+    # Display the welcome markdown file
+    # Use 'cat' since we don't assume 'glow' or another markdown renderer
+    cat "$WELCOME_FILE"
+else
+    echo -e "  ${GREEN}LucidOS${RESET} — A Debian-based Linux distribution with a Lucid Glass identity"
+    echo ""
+    echo "  Quick start:"
+    echo "  - Run 'lucidos-agent' to launch the AI assistant"
+    echo "  - Click 'Install LucidOS' on the desktop to install"
+    echo "  - Run 'man lucidos-agent' for agent documentation"
+    echo ""
+fi
+
+echo -e "  ${YELLOW}Tip:${RESET} Type ${BOLD}lucidos-agent${RESET} to launch the Lucid Agent assistant."
+echo ""

@@ -1,0 +1,28 @@
+# LucidOS Default /etc/skel Directory
+# =============================================================================
+# Files in this directory are automatically copied to the home directory
+# of each new user created on the system (including the live user 'lucid').
+#
+# How this directory works:
+# - /etc/skel/ is the "skeleton" for new user home directories
+# - When 'useradd' or 'adduser' creates a new user, files from /etc/skel/
+#   are copied to /home/<username>/
+# - For the live session user ('lucid'), live-config does the same
+#
+# What's included in this skel:
+# - .config/           â†’ Application configuration (KDE, GTK, etc.)
+# - .local/            â†’ User data and local binaries
+# - .bashrc            â†’ Bash configuration (set up by the hook)
+# - Desktop/           â†’ Desktop shortcuts and files
+#
+# IMPORTANT:
+# - The actual content of these directories is created by the live hook:
+#   config/hooks/live/0100-lucidos-live-user.hook.chroot
+# - This README is a placeholder to explain the directory's purpose
+# - During the build, the hook populates these directories
+#
+# If you want to add files directly (without a hook), create them here:
+# - live-build/config/includes.chroot/etc/skel/.config/
+# - live-build/config/includes.chroot/etc/skel/.bashrc
+# etc.
+# =============================================================================

@@ -1,0 +1,30 @@
+# =============================================================================
+# LucidOS Sudoers Configuration for Live Session
+# =============================================================================
+# File: /etc/sudoers.d/lucidos-live
+#
+# This file grants limited sudo access to the live user ('lucid').
+#
+# IMPORTANT SECURITY NOTES:
+# - This file ONLY grants NOPASSWD sudo for the Calamares installer.
+# - All other sudo commands still require the password (password: lucid).
+# - This file is automatically removed after installation completes.
+# - After installing LucidOS to disk, the installed system uses standard
+#   Debian sudoers rules (no NOPASSWD by default).
+#
+# Why Calamares gets NOPASSWD:
+# - The installer must run as root to partition disks and install files.
+# - The desktop launcher uses sudo -n /usr/bin/calamares, restricted to this
+#   exact command, so it can launch without a password in the live session.
+# - This is a well-established pattern used by Ubuntu, Manjaro, etc.
+#
+# File permissions must be exactly 440 (read-only for root).
+# The hook 0100-lucidos-defaults.hook.chroot ensures this.
+# =============================================================================
+
+# Allow the live user to run Calamares without a password
+# Calamares is the graphical installer - this is safe and expected.
+lucid ALL=(ALL) NOPASSWD: /usr/bin/calamares
+
+# Note: The live user can still run other sudo commands with password 'lucid'
+# Note: Do NOT add NOPASSWD for apt, systemctl, or other dangerous commands

@@ -86,7 +86,11 @@ jobs:
           find live-build/config/hooks -type f -name "*.hook.*" -exec chmod 755 {} \;
           find live-build/config/includes.chroot/usr/local/bin -type f -exec chmod 755 {} \;
           find live-build/config/includes.chroot/opt/lucidos-agent/scripts -type f -name "*.sh" -exec chmod 755 {} \;
-          chmod 440 live-build/config/includes.chroot/etc/sudoers.d/lucidos-live
+          if [[ -f live-build/config/includes.chroot/etc/sudoers.d/lucidos-live ]]; then
+            chmod 440 live-build/config/includes.chroot/etc/sudoers.d/lucidos-live
+          else
+            echo "WARNING: sudoers file not found in checkout; continuing without chmod."
+          fi
 
       - name: Verify build host
         run: bash scripts/verify-host.sh

@@ -1,0 +1,314 @@
+{
+  "_comment": "LucidOS Agent Default Policy â€” /opt/lucidos-agent/policy/default-policy.json",
+  "_description": "This is the agent-level default policy. It is more detailed than /etc/lucidos/agent-policy.json and includes additional pattern matching rules and per-command metadata. In Alpha 0.1, this is a static JSON file read by safe-runner.sh.",
+  "_version": "0.1.0",
+  "_security_note": "NEVER add commands that write to the filesystem or make network requests to the allowed_without_confirmation list. The whole point of this file is safety.",
+
+  "metadata": {
+    "policy_name": "LucidOS Default Agent Policy",
+    "policy_version": "0.1",
+    "compatible_with": "lucidos-agent >= 0.1",
+    "description": "Conservative default policy suitable for all users."
+  },
+
+  "allowed_without_confirmation": {
+    "_comment": "Read-only commands that cannot cause harm. No confirmation needed.",
+    "commands": [
+      {
+        "command": "pwd",
+        "description": "Print working directory",
+        "why_safe": "Read-only, shows current directory"
+      },
+      {
+        "command": "whoami",
+        "description": "Show current username",
+        "why_safe": "Read-only, no side effects"
+      },
+      {
+        "command": "uname -a",
+        "description": "Show system information",
+        "why_safe": "Read-only, shows kernel version and OS info"
+      },
+      {
+        "command": "df -h",
+        "description": "Show disk usage in human-readable format",
+        "why_safe": "Read-only, shows disk space"
+      },
+      {
+        "command": "free -h",
+        "description": "Show memory usage in human-readable format",
+        "why_safe": "Read-only, shows RAM usage"
+      },
+      {
+        "command": "uptime",
+        "description": "Show system uptime and load average",
+        "why_safe": "Read-only"
+      },
+      {
+        "command": "date",
+        "description": "Show current date and time",
+        "why_safe": "Read-only"
+      },
+      {
+        "command": "id",
+        "description": "Show user and group IDs",
+        "why_safe": "Read-only"
+      },
+      {
+        "command": "hostname",
+        "description": "Show system hostname",
+        "why_safe": "Read-only"
+      },
+      {
+        "command": "lsb_release -a",
+        "description": "Show distribution information",
+        "why_safe": "Read-only"
+      }
+    ],
+    "command_prefixes": [
+      {
+        "prefix": "ls",
+        "description": "List directory contents",
+        "why_safe": "Read-only file listing. Safe except if used to map sensitive paths.",
+        "note": "ls /etc/shadow would just list a file but not read it â€” still allowed"
+      },
+      {
+        "prefix": "echo",
+        "description": "Print text to terminal",
+        "why_safe": "Output only, no side effects unless redirected with > or >>"
+      },
+      {
+        "prefix": "cat /proc/",
+        "description": "Read kernel process information",
+        "why_safe": "Read-only access to /proc virtual filesystem"
+      },
+      {
+        "prefix": "cat /sys/",
+        "description": "Read kernel system information",
+        "why_safe": "Read-only access to /sys virtual filesystem"
+      },
+      {
+        "prefix": "cat /etc/os-release",
+        "description": "Read OS version information",
+        "why_safe": "Non-sensitive system file"
+      },
+      {
+        "prefix": "find /home/",
+        "description": "Find files in home directory",
+        "why_safe": "Only searches home directory, read-only"
+      },
+      {
+        "prefix": "grep",
+        "description": "Search text patterns in files",
+        "why_safe": "Read-only search"
+      },
+      {
+        "prefix": "which",
+        "description": "Find location of a command",
+        "why_safe": "Read-only"
+      },
+      {
+        "prefix": "man",
+        "description": "View manual pages",
+        "why_safe": "Read-only documentation"
+      },
+      {
+        "prefix": "ps",
+        "description": "List running processes",
+        "why_safe": "Read-only process listing"
+      },
+      {
+        "prefix": "ip addr",
+        "description": "Show network interfaces and addresses",
+        "why_safe": "Read-only network information"
+      },
+      {
+        "prefix": "ip route",
+        "description": "Show routing table",
+        "why_safe": "Read-only"
+      }
+    ]
+  },
+
+  "requires_confirmation": {
+    "_comment": "State-changing commands. User must type 'yes' before execution.",
+    "command_prefixes": [
+      {
+        "prefix": "apt install",
+        "description": "Install packages",
+        "risk_level": "medium",
+        "why_confirm": "Installing software changes the system state permanently"
+      },
+      {
+        "prefix": "apt remove",
+        "description": "Remove packages",
+        "risk_level": "medium",
+        "why_confirm": "Removing packages may break dependencies"
+      },
+      {
+        "prefix": "apt upgrade",
+        "description": "Upgrade installed packages",
+        "risk_level": "medium",
+        "why_confirm": "System-wide upgrade â€” should be intentional"
+      },
+      {
+        "prefix": "systemctl",
+        "description": "Control system services",
+        "risk_level": "medium",
+        "why_confirm": "Starting/stopping services affects system behavior"
+      },
+      {
+        "prefix": "git clone",
+        "description": "Clone a repository",
+        "risk_level": "low",
+        "why_confirm": "Downloads code from the internet â€” user should verify the URL"
+      },
+      {
+        "prefix": "git pull",
+        "description": "Pull changes from remote",
+        "risk_level": "low",
+        "why_confirm": "Downloads and applies code changes"
+      },
+      {
+        "prefix": "npm install",
+        "description": "Install Node.js packages",
+        "risk_level": "medium",
+        "why_confirm": "Installs potentially many packages; network access"
+      },
+      {
+        "prefix": "pip install",
+        "description": "Install Python packages",
+        "risk_level": "medium",
+        "why_confirm": "Installs packages; network access"
+      },
+      {
+        "prefix": "pip3 install",
+        "description": "Install Python 3 packages",
+        "risk_level": "medium",
+        "why_confirm": "Same as pip install"
+      },
+      {
+        "prefix": "cargo build",
+        "description": "Build a Rust project",
+        "risk_level": "low",
+        "why_confirm": "Compiles code; can take a long time and use significant CPU"
+      },
+      {
+        "prefix": "cargo install",
+        "description": "Install a Rust binary",
+        "risk_level": "medium",
+        "why_confirm": "Installs compiled binary to system"
+      },
+      {
+        "prefix": "chmod",
+        "description": "Change file permissions",
+        "risk_level": "medium",
+        "why_confirm": "Changing permissions can create security vulnerabilities if done incorrectly"
+      },
+      {
+        "prefix": "chown",
+        "description": "Change file ownership",
+        "risk_level": "medium",
+        "why_confirm": "Changing ownership affects who can access files"
+      },
+      {
+        "prefix": "mv",
+        "description": "Move or rename files",
+        "risk_level": "low",
+        "why_confirm": "Can overwrite files; data loss if used carelessly"
+      },
+      {
+        "prefix": "rm",
+        "description": "Remove files",
+        "risk_level": "high",
+        "why_confirm": "File deletion is permanent. Always confirm."
+      },
+      {
+        "prefix": "curl",
+        "description": "Transfer data from URLs",
+        "risk_level": "medium",
+        "why_confirm": "Network request; could download malicious content"
+      },
+      {
+        "prefix": "wget",
+        "description": "Download files from the web",
+        "risk_level": "medium",
+        "why_confirm": "Network request; same concerns as curl"
+      }
+    ]
+  },
+
+  "blocked": {
+    "_comment": "Absolutely forbidden. The agent refuses to run these, no exceptions.",
+    "exact_commands": [
+      {
+        "command": "rm -rf /",
+        "reason": "Destroys the entire filesystem"
+      },
+      {
+        "command": "rm -rf /*",
+        "reason": "Destroys the entire filesystem"
+      },
+      {
+        "command": ":(){:|:&};:",
+        "reason": "Fork bomb â€” crashes the system"
+      }
+    ],
+    "command_prefixes": [
+      {
+        "prefix": "rm -rf /",
+        "reason": "Recursive forced delete from root â€” destroys filesystem"
+      },
+      {
+        "prefix": "mkfs",
+        "reason": "Formats a disk partition â€” destroys all data on it"
+      },
+      {
+        "prefix": "shred",
+        "reason": "Securely destroys files â€” irreversible"
+      },
+      {
+        "prefix": "userdel",
+        "reason": "Deletes user accounts â€” can break the system"
+      },
+      {
+        "prefix": "passwd root",
+        "reason": "Changes root password â€” security risk"
+      },
+      {
+        "prefix": "dd if=",
+        "reason": "Raw disk operation â€” can destroy data or firmware"
+      }
+    ],
+    "pattern_contains": [
+      {
+        "pattern": "/dev/sda",
+        "reason": "Direct disk device access â€” risk of data destruction"
+      },
+      {
+        "pattern": "/dev/nvme0",
+        "reason": "Direct NVMe disk access â€” risk of data destruction"
+      },
+      {
+        "pattern": "/etc/shadow",
+        "reason": "Password hash file â€” sensitive credential data"
+      },
+      {
+        "pattern": "~/.ssh/id_",
+        "reason": "SSH private key â€” sensitive credential data"
+      },
+      {
+        "pattern": "curl | bash",
+        "reason": "Remote code execution â€” never pipe curl to bash"
+      },
+      {
+        "pattern": "curl | sh",
+        "reason": "Remote code execution â€” never pipe curl to sh"
+      },
+      {
+        "pattern": "wget -O- | bash",
+        "reason": "Remote code execution â€” never pipe wget to bash"
+      }
+    ]
+  }
+}

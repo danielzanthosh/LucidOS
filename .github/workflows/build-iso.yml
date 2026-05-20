@@ -1,0 +1,131 @@
+name: Build LucidOS ISO
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "live-build/**"
+      - "scripts/**"
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build-iso:
+    name: Build Alpha 0.1 ISO
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+
+    env:
+      DEBIAN_FRONTEND: noninteractive
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Show runner information
+        run: |
+          set -euxo pipefail
+          echo "== OS =="
+          cat /etc/os-release
+          uname -a
+          echo
+          echo "== CPU =="
+          lscpu
+          echo
+          echo "== RAM =="
+          free -h
+          echo
+          echo "== Disk =="
+          df -h
+
+      - name: Free runner disk space
+        run: |
+          set -euxo pipefail
+          echo "== Disk before cleanup =="
+          df -h
+
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+          docker system prune -af || true
+          sudo rm -rf /var/lib/docker || true
+          sudo rm -rf /var/lib/containerd || true
+
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/*
+
+          echo "== Disk after cleanup =="
+          df -h
+
+      - name: Install build tools
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            live-build \
+            debootstrap \
+            squashfs-tools \
+            xorriso \
+            isolinux \
+            syslinux-common \
+            qemu-system-x86 \
+            ovmf
+
+      - name: Normalize executable permissions
+        run: |
+          set -euxo pipefail
+          chmod 755 scripts/*.sh
+          chmod 755 live-build/auto/config live-build/auto/build live-build/auto/clean
+          find live-build/config/hooks -type f -name "*.hook.*" -exec chmod 755 {} \;
+          find live-build/config/includes.chroot/usr/local/bin -type f -exec chmod 755 {} \;
+          find live-build/config/includes.chroot/opt/lucidos-agent/scripts -type f -name "*.sh" -exec chmod 755 {} \;
+          chmod 440 live-build/config/includes.chroot/etc/sudoers.d/lucidos-live
+
+      - name: Verify build host
+        run: bash scripts/verify-host.sh
+
+      - name: Build ISO
+        run: bash scripts/build.sh
+
+      - name: Debug build failure
+        if: failure()
+        run: |
+          set +e
+          echo "== System =="
+          cat /etc/os-release
+          uname -a
+          echo
+          echo "== Disk =="
+          df -h
+          echo
+          echo "== Memory =="
+          free -h
+          echo
+          echo "== Top-level files =="
+          ls -lah
+          echo
+          echo "== dist =="
+          ls -lah dist || true
+          echo
+          echo "== live-build =="
+          ls -lah live-build || true
+          echo
+          echo "== ISO candidates =="
+          find . -maxdepth 3 -type f \( -name "*.iso" -o -name "*.hybrid.iso" \) -print -exec ls -lh {} \;
+          echo
+          echo "== live-build/build.log tail =="
+          tail -200 live-build/build.log || true
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lucidos-alpha-iso
+          path: dist/*.iso
+          if-no-files-found: error
+          retention-days: 7

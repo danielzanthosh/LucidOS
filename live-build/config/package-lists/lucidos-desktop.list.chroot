@@ -1,0 +1,133 @@
+# =============================================================================
+# LucidOS Desktop Package List
+# =============================================================================
+# File: config/package-lists/lucidos-desktop.list.chroot
+#
+# KDE Plasma desktop environment and related applications.
+# These packages provide the full graphical desktop experience.
+#
+# Design philosophy:
+# - Use kde-plasma-desktop (not kde-full or kde-standard)
+#   to avoid pulling in too many extras for the initial release
+# - Include only the KDE apps we actually want in the default install
+# - Use Breeze Dark as the visual base for the Lucid Glass theme
+# =============================================================================
+
+# --- KDE Plasma Desktop ---
+# kde-plasma-desktop: The core KDE Plasma desktop (shell, taskbar, etc.)
+# This does NOT include the full KDE application suite — just the shell.
+kde-plasma-desktop
+
+# --- Plasma subsystems ---
+# These provide important Plasma features like theming and widgets.
+plasma-workspace
+plasma-desktop
+plasma-framework
+plasma-integration
+plasma-pa
+plasma-nm
+plasma-systemmonitor
+kscreen
+powerdevil
+bluedevil
+kinfocenter
+kgamma5
+
+# --- Display Manager ---
+# SDDM is the recommended display manager for KDE Plasma.
+# It supports themes and integrates well with Plasma.
+sddm
+sddm-theme-breeze
+
+# --- KDE Applications ---
+# Only include apps we actually want in the default LucidOS install.
+# More apps can always be installed later via the package manager.
+dolphin
+konsole
+kate
+ark
+spectacle
+gwenview
+okular
+kcalc
+# krunner is provided by plasma-workspace on Debian Bookworm. Do not list it
+# as a standalone package here, because package naming differs across releases.
+
+# --- KDE System Settings and configuration tools ---
+systemsettings
+kde-config-gtk-style
+kde-config-screenlocker
+kde-config-sddm
+# kcmutils is a KDE Framework library/source name, not a Bookworm binary
+# package. The needed KCM utilities are pulled by systemsettings and modules.
+kmenuedit
+
+# --- KDE theming ---
+# Breeze is the default KDE theme — we use it as a base for Lucid Glass.
+breeze
+breeze-gtk-theme
+breeze-icon-theme
+kde-style-breeze
+
+# --- Icon themes ---
+# Papirus is a high-quality icon theme that works well with dark themes.
+# If it's available in Debian stable, include it.
+papirus-icon-theme
+
+# --- Fonts ---
+# Noto fonts for broad Unicode/multilingual coverage.
+# fonts-noto-core is the smaller package with common scripts.
+fonts-noto
+fonts-noto-core
+fonts-noto-color-emoji
+
+# --- Additional recommended fonts ---
+# Inter is a popular UI font. In Debian, it may be available as:
+# fonts-inter (check availability in Debian bookworm)
+# As a fallback, use fonts-open-sans which is available in Debian.
+# TODO: Check if fonts-inter is available in Debian bookworm
+# fonts-inter  # Uncomment if available
+fonts-open-sans
+
+# Monospace font for terminal use
+fonts-hack
+
+# --- GTK compatibility ---
+# Makes GTK apps look consistent with the Qt/KDE theme.
+qt5-style-plugins
+adwaita-qt
+kde-config-gtk-style-preview
+
+# --- Compositor and effects ---
+# KWin is the KDE compositor (handles blur, transparency, animations).
+# It's part of kde-plasma-desktop but listed here for clarity.
+# kwin-x11
+
+# --- Plasma addons for Lucid Glass look ---
+# These provide additional widgets and effects.
+plasma-widgets-addons
+plasma-dataengines-addons
+kdeplasma-addons
+
+# --- File manager extras ---
+# Extra functionality for Dolphin (file manager).
+dolphin-plugins
+ffmpegthumbs
+# kde-thumbnailer-pdf does NOT exist in Debian Bookworm.
+# The correct package for PDF/image thumbnailing in Dolphin is:
+kdegraphics-thumbnailers
+
+# --- Multimedia (minimal) ---
+# Basic multimedia support for the live session.
+vlc
+ffmpeg
+
+# --- Archive handling ---
+# Full archive support for Ark (the KDE archive manager).
+p7zip-full
+unrar-free
+
+# --- Accessibility ---
+# Basic accessibility support.
+at-spi2-core
+orca

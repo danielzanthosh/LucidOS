@@ -42,7 +42,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 LIVE_BUILD_DIR="${PROJECT_ROOT}/live-build"
 DIST_DIR="${PROJECT_ROOT}/dist"
-ISO_NAME="lucidos-alpha-0.1-amd64.iso"
+ISO_NAME="lucid-linux-alpha-0.2-amd64.iso"
 
 if [[ "${EUID}" -eq 0 ]]; then
     RUN_LB_BUILD=(lb build)
@@ -62,7 +62,7 @@ echo "  ██║     ██║   ██║██║     ██║██║  █
 echo "  ███████╗╚██████╔╝╚██████╗██║██████╔╝╚██████╔╝███████║"
 echo "  ╚══════╝ ╚═════╝  ╚═════╝╚═╝╚═════╝  ╚═════╝ ╚══════╝"
 echo ""
-echo -e "  LucidOS Build System — Alpha 0.1${RESET}"
+echo -e "  Lucid Linux Build System — Alpha 0.2${RESET}"
 echo ""
 
 # --------------------------------------------------------------------------
@@ -206,7 +206,7 @@ fi
 # --------------------------------------------------------------------------
 # Build Step 2: Run lb build
 # --------------------------------------------------------------------------
-header "Building LucidOS ISO"
+header "Building Lucid Linux ISO"
 info "This will take 20–60 minutes depending on network speed and hardware."
 info "Packages are downloaded fresh on first build."
 echo ""
@@ -259,7 +259,7 @@ success "ISO ready: ${DEST_ISO} (${ISO_SIZE})"
 # --------------------------------------------------------------------------
 echo ""
 echo -e "${BOLD}${GREEN}╔════════════════════════════════════════════════════╗${RESET}"
-echo -e "${BOLD}${GREEN}║          LucidOS ISO Build Complete!                 ║${RESET}"
+echo -e "${BOLD}${GREEN}║          Lucid Linux ISO Build Complete!            ║${RESET}"
 echo -e "${BOLD}${GREEN}╚════════════════════════════════════════════════════╝${RESET}"
 echo ""
 echo "  ISO:  ${DEST_ISO}"

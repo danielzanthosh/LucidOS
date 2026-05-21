@@ -33,13 +33,13 @@ log "Starting LucidOS system defaults hook..."
 # --------------------------------------------------------------------------
 # 1. Set system hostname
 # --------------------------------------------------------------------------
-log "Setting hostname to: lucidos"
-echo "lucidos" > /etc/hostname
+log "Setting hostname to: lucid"
+echo "lucid" > /etc/hostname
 
 # Update /etc/hosts so the hostname resolves locally
 cat > /etc/hosts << 'EOF'
 127.0.0.1   localhost
-127.0.1.1   lucidos
+127.0.1.1   lucid
 ::1         localhost ip6-localhost ip6-loopback
 ff02::1     ip6-allnodes
 ff02::2     ip6-allrouters
@@ -217,28 +217,28 @@ fi
 # --------------------------------------------------------------------------
 log "Configuring OS identity..."
 cat > /etc/os-release << 'EOF'
-PRETTY_NAME="LucidOS Alpha 0.1"
-NAME="LucidOS"
-VERSION_ID="0.1"
-VERSION="Alpha 0.1"
+PRETTY_NAME="Lucid Linux Alpha 0.2"
+NAME="Lucid Linux"
+VERSION_ID="0.2"
+VERSION="Alpha 0.2"
 VERSION_CODENAME="glass"
-ID=lucidos
+ID=lucid
 ID_LIKE=debian
-HOME_URL="https://github.com/your-org/lucidos"
-SUPPORT_URL="https://github.com/your-org/lucidos/issues"
-BUG_REPORT_URL="https://github.com/your-org/lucidos/issues"
-LOGO="lucidos"
+HOME_URL="https://github.com/lucid-linux/lucid-linux"
+SUPPORT_URL="https://github.com/lucid-linux/lucid-linux"
+BUG_REPORT_URL="https://github.com/lucid-linux/lucid-linux"
+LOGO="lucid-logo"
 EOF
 
 # Also update /etc/lsb-release for compatibility
 cat > /etc/lsb-release << 'EOF'
-DISTRIB_ID=LucidOS
-DISTRIB_RELEASE=0.1
+DISTRIB_ID=Lucid
+DISTRIB_RELEASE=0.2
 DISTRIB_CODENAME=glass
-DISTRIB_DESCRIPTION="LucidOS Alpha 0.1"
+DISTRIB_DESCRIPTION="Lucid Linux Alpha 0.2"
 EOF
 
-log "OS identity set to LucidOS Alpha 0.1"
+log "OS identity set to Lucid Linux Alpha 0.2"
 
 # --------------------------------------------------------------------------
 # 11. Set up desktop backgrounds directory

@@ -14,6 +14,7 @@ require_file() {
 }
 
 require_executable() {
+  [[ -f "$1" ]] || fail "Missing required executable file: $1"
   [[ -x "$1" ]] || fail "Required file is not executable: $1"
 }
 
@@ -27,6 +28,12 @@ forbidden_visible=(
   "Install Debian"
   "LucidOS Alpha 0.1"
   "LucidOS Build System"
+  "Name=Install LucidOS"
+  "Comment=Install LucidOS"
+  "Comment=Safe local agentic assistant shell for LucidOS"
+  "Exec=konsole -e lucidos-agent"
+  "ID=lucidos"
+  "DISTRIB_ID=LucidOS"
 )
 
 scan_paths=(README.md ROADMAP.md SECURITY.md scripts live-build assets .github)
@@ -41,6 +48,7 @@ done
 for text in "${forbidden_visible[@]}"; do
   if ((${#existing_scan_paths[@]})); then
     matches="$(mktemp)"
+    trap 'rm -f "$matches"' EXIT
     status=0
     grep -RFIn --exclude='verify-lucid-branding.sh' "$text" "${existing_scan_paths[@]}" >"$matches" || status=$?
 
@@ -48,7 +56,7 @@ for text in "${forbidden_visible[@]}"; do
       cat "$matches"
       rm -f "$matches"
       fail "Found old visible branding: $text"
-    elif [[ $status -eq 2 ]]; then
+    elif [[ $status -gt 1 ]]; then
       cat "$matches" >&2
       rm -f "$matches"
       fail "grep failed while scanning for old visible branding: $text"
@@ -71,6 +79,8 @@ require_line 'Name=Install Lucid Linux' "live-build/config/includes.chroot/usr/s
 require_line 'Name=Lucid Agent' "live-build/config/includes.chroot/usr/share/applications/lucidos-agent.desktop"
 require_line 'Name=Install Lucid Linux' "live-build/config/hooks/live/0100-lucidos-live-user.hook.chroot"
 require_line 'Comment=Install Lucid Linux to your hard drive using the Calamares installer' "live-build/config/hooks/live/0100-lucidos-live-user.hook.chroot"
+require_line 'Name=Lucid Agent' "live-build/config/hooks/live/0100-lucidos-live-user.hook.chroot"
+require_line 'Comment=Lucid Agent powered by Hermes' "live-build/config/hooks/live/0100-lucidos-live-user.hook.chroot"
 require_line 'Exec=konsole --hide-menubar -e lucid-agent-onboarding' "live-build/config/hooks/live/0100-lucidos-live-user.hook.chroot"
 
 echo "[OK] Lucid Linux branding verification passed"

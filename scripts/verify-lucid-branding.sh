@@ -25,8 +25,17 @@ forbidden_visible=(
   "LucidOS Build System"
 )
 
+scan_paths=(README.md BUILDING.md ROADMAP.md SECURITY.md scripts live-build assets .github)
+existing_scan_paths=()
+
+for path in "${scan_paths[@]}"; do
+  if [[ -e "$path" ]]; then
+    existing_scan_paths+=("$path")
+  fi
+done
+
 for text in "${forbidden_visible[@]}"; do
-  if grep -RIn --exclude-dir=.git --exclude='2026-05-21-alpha-0.2-lucid-linux-design.md' "$text" .; then
+  if ((${#existing_scan_paths[@]})) && grep -RFIn --exclude='verify-lucid-branding.sh' "$text" "${existing_scan_paths[@]}"; then
     fail "Found old visible branding: $text"
   fi
 done

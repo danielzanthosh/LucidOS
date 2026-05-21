@@ -1,71 +1,54 @@
-# LucidOS Branding
+# Lucid Linux Branding
 
-This directory contains branding assets for LucidOS â€” logos, color swatches, typography, and brand guidelines.
+This directory documents Lucid Linux brand assets, including logos, color choices, typography, and usage guidance for Alpha 0.2.
 
-## Current Status: Alpha 0.1 â€” Placeholder
+## Current Status: Alpha 0.2
 
-No official branding assets exist yet. This directory is reserved for future branding materials.
+Alpha 0.2 introduces original Lucid Linux assets for the live desktop and installer surface. These assets are macOS-inspired only in mood and broad desktop layout: calm, glassy, polished, and readable. They do not use Apple marks, fruit shapes, proprietary UI marks, copied wallpapers, or copied third-party artwork.
 
-## Planned Branding Assets (Alpha 0.2+)
+## Included Branding Assets
 
-- `lucidos-logo.svg` â€” Official LucidOS logo (SVG, original design)
-- `lucidos-logo-dark.svg` â€” Logo variant for dark backgrounds
-- `lucidos-logo-light.svg` â€” Logo variant for light backgrounds
-- `lucidos-wordmark.svg` â€” Text-only "LucidOS" wordmark
-- `brand-guide.md` â€” Full brand guidelines document
-- `color-palette.svg` â€” Visual color palette reference
-- `typography.md` â€” Typography guidelines
+- `live-build/config/includes.chroot/usr/share/icons/hicolor/scalable/apps/lucid-logo.svg` - Original Lucid Linux geometric prism/aperture logo with a Lucid `L` signal.
+- `live-build/config/includes.chroot/usr/share/lucid/lucid-ascii.txt` - Terminal ASCII banner for Lucid Linux Alpha 0.2.
 
 ## Brand Identity Guidelines
 
 ### Name
-- Official name: **LucidOS**
-- Capitalization: Always "LucidOS" (capital L, capital OS)
-- Short form: "Lucid" (acceptable in informal contexts)
-- Never: "lucidos", "LUCIDOS", "Lucid OS" (two words)
 
-### Forbidden
-- âŒ No Apple logos, Apple-style icons, or Apple-inspired wordmarks
-- âŒ No macOS screenshot elements
-- âŒ No copying of any existing brand's visual identity
-- âŒ No use of the Apple "California" or "macOS" visual style specifically
+- Official name: **Lucid Linux**
+- Product/version label: **Lucid Linux Alpha 0.2**
+- Short form: **Lucid** when the Linux context is already clear.
+- Avoid visible **LucidOS** text in Alpha 0.2 assets and documentation.
+
+### Originality
+
+- No Apple logos, fruit shapes, Apple-style icons, or Apple-inspired wordmarks.
+- No macOS screenshots, proprietary UI marks, or copied desktop chrome.
+- No copied wallpapers, copied mountains, or unlicensed third-party artwork.
+- macOS influence is limited to mood and layout principles, not asset reproduction.
 
 ### Color Palette
 
-The Lucid Glass color palette:
+The Lucid Linux Alpha 0.2 palette is restrained, dark, and glassy:
 
 | Name | Hex | Use |
 |------|-----|-----|
-| Night Base | `#060914` | Primary background |
-| Midnight Blue | `#0a1128` | Secondary background, panels |
-| Indigo Glass | `#3730a3` | Primary brand color |
-| Teal Glass | `#0d9488` | Secondary brand color |
-| Soft Violet | `#7c3aed` | Accent/highlight |
-| Cyan Light | `#06b6d4` | Focus indicators |
-| Ghost White | `#e0e7ff` | Text on dark |
-| Slate | `#94a3b8` | Secondary text |
+| Night Base | `#080b14` | Primary background |
+| Deep Surface | `#0d1325` | Desktop and panel depth |
+| Raised Glass | `#18233d` | Logo and glass surfaces |
+| Accent Cyan | `#67e8ff` | Focus, glow, logo edge light |
+| Accent Violet | `#8e78ff` | Secondary glow and prism refraction |
+| Mist Text | `#e6f7ff` | Highlights on dark surfaces |
+| Slate Text | `#94a3b8` | Secondary text |
 
 ### Typography
 
-- **Primary font:** Noto Sans (available in Debian repos, multilingual)
-- **Display/headings:** Consider a geometric sans-serif (Open Sans, Inter)
-- **Monospace (terminal):** Hack (available in Debian)
-- **Note:** All fonts must be freely licensed and available in Debian repos
+- **Primary font:** Noto Sans
+- **Monospace:** Hack
+- Use freely licensed fonts available in Debian repositories.
 
-### Logo Design Principles (for when the logo is created)
+### Logo Principles
 
-- Should work on dark backgrounds primarily
-- Must be recognizable at small sizes (16Ã—16 px app icon)
-- Avoid highly complex designs
-- Inspired by "lucidity" and "glass" â€” consider a gem, prism, or light-refracting shape
-- Original artwork only
-
-## Creating the Logo (Volunteer/Contributor Task)
-
-If you'd like to contribute the LucidOS logo:
-1. Read these guidelines carefully
-2. Create an original SVG logo in Inkscape or similar
-3. Submit a PR with the file in this directory
-4. The logo must be your own original work, licensed under CC0 or MIT
-
-The accepted logo will become the official LucidOS identity.
+- Original abstract geometric prism/aperture mark.
+- Readable on dark backgrounds and at app-icon sizes.
+- Includes a clear Lucid `L` signal without resembling a fruit, proprietary mark, or copied platform logo.

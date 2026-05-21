@@ -1,9 +1,9 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Install LucidOS
+Name=Install Lucid Linux
 GenericName=System Installer
-Comment=Install LucidOS to your hard drive using the Calamares graphical installer
+Comment=Install Lucid Linux to your hard drive using the Calamares graphical installer
 Exec=sudo -n /usr/bin/calamares
 Icon=calamares
 Terminal=false

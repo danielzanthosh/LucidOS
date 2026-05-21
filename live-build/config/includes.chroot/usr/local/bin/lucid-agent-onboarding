@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MARKER="${XDG_CONFIG_HOME:-$HOME/.config}/lucid/agent-onboarding-done"
+ASCII="/usr/share/lucid/lucid-ascii.txt"
+
+mkdir -p "$(dirname "$MARKER")"
+
+if [[ "${1:-}" == "--once" && -f "$MARKER" ]]; then
+  exit 0
+fi
+
+clear || true
+[[ -f "$ASCII" ]] && cat "$ASCII"
+echo ""
+echo "Welcome to Lucid Agent, powered by Hermes."
+echo ""
+echo "Lucid Agent can help with local tasks, automation, coding workflows,"
+echo "and system guidance. It will ask before sensitive actions."
+echo ""
+echo "No API key is required to use the desktop."
+echo ""
+echo "Commands:"
+echo "  lucid-agent --help"
+echo "  lucid-agent"
+echo ""
+read -r -p "Press Enter to continue..." _
+touch "$MARKER"
+exec lucid-agent --help

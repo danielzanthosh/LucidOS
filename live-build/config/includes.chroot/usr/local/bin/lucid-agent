@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if command -v hermes-agent >/dev/null 2>&1; then
+  exec hermes-agent "$@"
+fi
+
+if command -v hermes >/dev/null 2>&1; then
+  exec hermes "$@"
+fi
+
+echo "Lucid Agent is powered by Hermes Agent, but Hermes was not found."
+echo "This Alpha image is incomplete. Please check /usr/share/lucid/hermes-attribution.md."
+exit 127

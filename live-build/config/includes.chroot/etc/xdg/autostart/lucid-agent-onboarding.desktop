@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Lucid Agent Onboarding
+Comment=Open Lucid Agent onboarding on first login
+Exec=konsole --hide-menubar -e lucid-agent-onboarding --once
+Icon=lucid-logo
+Terminal=false
+OnlyShowIn=KDE;
+X-KDE-autostart-after=panel

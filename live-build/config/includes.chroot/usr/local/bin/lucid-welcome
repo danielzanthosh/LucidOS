@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+WELCOME_FILE="/usr/share/lucidos/welcome.md"
+ASCII="/usr/share/lucid/lucid-ascii.txt"
+
+case "${1:-}" in
+  --brief|-b)
+    echo "Welcome to Lucid Linux Alpha 0.2. Type lucid-agent to launch Lucid Agent."
+    exit 0
+    ;;
+esac
+
+[[ -f "$ASCII" ]] && cat "$ASCII"
+echo ""
+
+if [[ -f "$WELCOME_FILE" ]]; then
+  cat "$WELCOME_FILE"
+else
+  echo "Welcome to Lucid Linux Alpha 0.2"
+  echo ""
+  echo "Type lucid-agent to launch Lucid Agent."
+fi

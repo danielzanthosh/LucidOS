@@ -225,8 +225,8 @@ VERSION_CODENAME="glass"
 ID=lucid
 ID_LIKE=debian
 HOME_URL="https://github.com/lucid-linux/lucid-linux"
-SUPPORT_URL="https://github.com/lucid-linux/lucid-linux"
-BUG_REPORT_URL="https://github.com/lucid-linux/lucid-linux"
+SUPPORT_URL="https://github.com/lucid-linux/lucid-linux/issues"
+BUG_REPORT_URL="https://github.com/lucid-linux/lucid-linux/issues"
 LOGO="lucid-logo"
 EOF
 
